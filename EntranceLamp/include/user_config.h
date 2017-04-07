@@ -3,25 +3,13 @@
 #define __USER_CONFIG_H__
 #include "mqtt.h"
 
-
-#include "D:\HomeAutomation\ESP8266\security.h"
 // security.h has definition of SSID and Password for Wi-fi
-
-/*
- * GPIO2 => DHT22
- * GPIO4 => DS18B20
- * GPIO5 => NOT IN USE
- * GPIO12 => FAN
- * GPIO13 => HEATER
- * GPIO14 => BOILER
- */
-
-
+#include "D:\HomeAutomation\ESP8266\security.h"
 
 #define USE_WIFI_MODE		STATIONAP_MODE
 #define WIFI_CLIENTSSID		WIFI_SSID
 #define WIFI_CLIENTPASSWORD	WIFI_PASSWORD
-#define WIFI_AP_NAME		"LR_HEATER2"
+#define WIFI_AP_NAME		"EntranceOutsideLight"
 #define WIFI_AP_PASSWORD	"00000000"
 #define PLATFORM_DEBUG		true
 
@@ -35,7 +23,7 @@
 #define MQTT_BUF_SIZE		1024
 #define MQTT_KEEPALIVE		60	 /*second*/
 
-#define MQTT_CLIENT_ID		"LR_HEATER2"
+#define MQTT_CLIENT_ID		"EntranceOutsideLight"
 #define MQTT_USER			""
 #define MQTT_PASS			""
 
@@ -50,21 +38,23 @@
 
 #define QUEUE_BUFFER_SIZE		 		2048
 
+#define PROTOCOL_NAMEv31	/*MQTT version 3.1 compatible with Mosquitto v0.15*/
+//PROTOCOL_NAMEv311			/*MQTT version 3.11 compatible with https://eclipse.org/paho/clients/testing/*/
+
+
 // Static definitions from MQTT user_init.c
 // GPIO settings - all GPIOs set as GPIO
 // DS18B20
 #define PIN_GPIO2 2
 #define PIN_GPIO2_MUX PERIPHS_IO_MUX_GPIO2_U
 #define PIN_GPIO2_FUNC FUNC_GPIO2
-//#define PIN_GPIO2_TOPIC "LR_HEATER1"
-//#define PIN_GPIO2_TOPIC_CB "LR_HEATER1_CB"
 
 // Output pin for the relay
 #define PIN_GPIO4 4
 #define PIN_GPIO4_MUX PERIPHS_IO_MUX_MTDI_U
 #define PIN_GPIO4_FUNC FUNC_GPIO4
-#define PIN_GPIO4_TOPIC "LR_HEATER2"
-#define PIN_GPIO4_TOPIC_CB "LR_HEATER2_CB"
+#define PIN_GPIO4_TOPIC "home/floor1/entrance/outside/light/1"
+#define PIN_GPIO4_TOPIC_CB "home/floor1/entrance/outside/light/1cb"
 
 #define PIN_GPIO5 5
 #define PIN_GPIO5_MUX PERIPHS_IO_MUX_GPIO5_U
@@ -82,7 +72,7 @@
 #define PIN_GPIO14_MUX PERIPHS_IO_MUX_MTDI_U
 #define PIN_GPIO14_FUNC FUNC_GPIO14
 
-#define LRHEATER_MQTT_Temperature "LRHEATER_MQTT_Temperature"
+//#define LRHEATER_MQTT_Temperature "LRHEATER_MQTT_Temperature"
 
 MQTT_Client mqttClient;
 char currGPIO2State;

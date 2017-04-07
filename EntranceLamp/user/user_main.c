@@ -37,6 +37,8 @@
 #include "gpio.h"
 #include "user_interface.h"
 #include "mem.h"
+#include "user_config.h"
+
 
 MQTT_Client mqttClient;
 
@@ -52,14 +54,8 @@ void mqttConnectedCb(uint32_t *args)
 {
 	MQTT_Client* client = (MQTT_Client*)args;
 	INFO("MQTT: Connected\r\n");
-	MQTT_Subscribe(client, "/mqtt/topic/0", 0);
-	MQTT_Subscribe(client, "/mqtt/topic/1", 1);
-	MQTT_Subscribe(client, "/mqtt/topic/2", 2);
-
-	MQTT_Publish(client, "/mqtt/topic/0", "hello0", 6, 0, 0);
-	MQTT_Publish(client, "/mqtt/topic/1", "hello1", 6, 1, 0);
-	MQTT_Publish(client, "/mqtt/topic/2", "hello2", 6, 2, 0);
-
+	MQTT_Subscribe(&mqttClient, PIN_GPIO4_TOPIC, 0);
+//	MQTT_Publish(client, "/mqtt/topic/2", "hello2", 6, 2, 0);
 }
 
 void mqttDisconnectedCb(uint32_t *args)
@@ -74,12 +70,10 @@ void mqttPublishedCb(uint32_t *args)
 	INFO("MQTT: Published\r\n");
 }
 
-void mqttDataCb(uint32_t *args, const char* topic, uint32_t topic_len, const char *data, uint32_t data_len)
-{
-	char *topicBuf = (char*)os_zalloc(topic_len+1),
-			*dataBuf = (char*)os_zalloc(data_len+1);
-
-	MQTT_Client* client = (MQTT_Client*)args;
+void mqttDataCb(uint32_t *args, const char* topic, uint32_t topic_len,
+		const char *data, uint32_t data_len) {
+	char topicBuf[64], dataBuf[64];
+	MQTT_Client* client = (MQTT_Client*) args;
 
 	os_memcpy(topicBuf, topic, topic_len);
 	topicBuf[topic_len] = 0;
@@ -87,7 +81,22 @@ void mqttDataCb(uint32_t *args, const char* topic, uint32_t topic_len, const cha
 	os_memcpy(dataBuf, data, data_len);
 	dataBuf[data_len] = 0;
 
-	INFO("Receive topic: %s, data: %s \r\n", topicBuf, dataBuf);
+	// GPIO4 handling here
+	if (strcmp(topicBuf, PIN_GPIO4_TOPIC) == 0) {
+		if (strcmp(dataBuf, "OFF") == 0) {
+			GPIO_OUTPUT_SET(PIN_GPIO4, 0);
+			INFO("GPIO4 set to OFF\r\n");
+			MQTT_Publish(&mqttClient, PIN_GPIO4_TOPIC_CB, "OFF", 3, 0, 0);
+		} else if (strcmp(dataBuf, "ON") == 0) {
+			GPIO_OUTPUT_SET(PIN_GPIO4, 1);
+			INFO("GPIO4 set to ON\r\n");
+			MQTT_Publish(&mqttClient, PIN_GPIO4_TOPIC_CB, "ON", 2, 0, 0);
+		}
+	}
+	// HERE ENDS THE BASIC LOGIC BY KONSTANTIN
+
+	//	INFO("GPIO2 State: %d",GPIO_INPUT_GET(PIN_GPIO));
+	INFO("MQTT topic: %s, data: %s \r\n", topicBuf, dataBuf);
 	os_free(topicBuf);
 	os_free(dataBuf);
 }
@@ -135,19 +144,20 @@ void ICACHE_FLASH_ATTR user_init(void)
 
 	CFG_Load();
 
-	MQTT_InitConnection(&mqttClient, sysCfg.mqtt_host, sysCfg.mqtt_port, sysCfg.security);
-	//MQTT_InitConnection(&mqttClient, "192.168.11.122", 1880, 0);
+//	MQTT_InitConnection(&mqttClient, sysCfg.mqtt_host, sysCfg.mqtt_port, sysCfg.security);
+	MQTT_InitConnection(&mqttClient, "192.168.254.40", 1880, DEFAULT_SECURITY);
 
-	MQTT_InitClient(&mqttClient, sysCfg.device_id, sysCfg.mqtt_user, sysCfg.mqtt_pass, sysCfg.mqtt_keepalive, 1);
-	//MQTT_InitClient(&mqttClient, "client_id", "user", "pass", 120, 1);
+//	MQTT_InitClient(&mqttClient, sysCfg.device_id, sysCfg.mqtt_user, sysCfg.mqtt_pass, sysCfg.mqtt_keepalive, 1);
+	MQTT_InitClient(&mqttClient, "EntranceLamp", "user", "pass", 120, 1);
 
-	MQTT_InitLWT(&mqttClient, "/lwt", "offline", 0, 0);
+//	MQTT_InitLWT(&mqttClient, "/lwt", "offline", 0, 0);
 	MQTT_OnConnected(&mqttClient, mqttConnectedCb);
 	MQTT_OnDisconnected(&mqttClient, mqttDisconnectedCb);
 	MQTT_OnPublished(&mqttClient, mqttPublishedCb);
 	MQTT_OnData(&mqttClient, mqttDataCb);
 
-	WIFI_Connect(sysCfg.sta_ssid, sysCfg.sta_pwd, wifiConnectCb);
+//	WIFI_Connect(sysCfg.sta_ssid, sysCfg.sta_pwd, wifiConnectCb);
+	WIFI_Connect(WIFI_CLIENTSSID, WIFI_CLIENTPASSWORD, wifiConnectCb);
 
 	INFO("\r\nSystem started ...\r\n");
 }
