@@ -9,7 +9,7 @@
 # Output directors to store intermediate compiled files
 # relative to the project directory
 BUILD_BASE	= build
-FW_BASE		= firmware
+FW_BASE		= firmware 
 FLAVOR = release
 #FLAVOR = debug 
 
