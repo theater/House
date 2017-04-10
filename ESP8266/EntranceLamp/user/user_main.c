@@ -32,25 +32,27 @@
 #include "osapi.h"
 #include "mqtt.h"
 #include "wifi.h"
-#include "config.h"
 #include "debug.h"
 #include "gpio.h"
 #include "user_interface.h"
 #include "mem.h"
-#include "user_config.h"
 
+#include "../include/user_config.h"
 
 MQTT_Client mqttClient;
+//MQTT_Client mqttClient;
 
-void wifiConnectCb(uint8_t status)
+void ICACHE_FLASH_ATTR wifiConnectCb(uint8_t status)
 {
 	if(status == STATION_GOT_IP){
 		MQTT_Connect(&mqttClient);
+		INFO("Got IP !");
 	} else {
-		MQTT_Disconnect(&mqttClient);
+//		MQTT_Disconnect(&mqttClient);
+		INFO("NO IP ! Disconnected...");
 	}
 }
-void mqttConnectedCb(uint32_t *args)
+void ICACHE_FLASH_ATTR mqttConnectedCb(uint32_t *args)
 {
 	MQTT_Client* client = (MQTT_Client*)args;
 	INFO("MQTT: Connected\r\n");
@@ -64,13 +66,13 @@ void mqttDisconnectedCb(uint32_t *args)
 	INFO("MQTT: Disconnected\r\n");
 }
 
-void mqttPublishedCb(uint32_t *args)
+void ICACHE_FLASH_ATTR mqttPublishedCb(uint32_t *args)
 {
 	MQTT_Client* client = (MQTT_Client*)args;
 	INFO("MQTT: Published\r\n");
 }
 
-void mqttDataCb(uint32_t *args, const char* topic, uint32_t topic_len,
+void ICACHE_FLASH_ATTR mqttDataCb(uint32_t *args, const char* topic, uint32_t topic_len,
 		const char *data, uint32_t data_len) {
 	char topicBuf[64], dataBuf[64];
 	MQTT_Client* client = (MQTT_Client*) args;
@@ -142,10 +144,8 @@ void ICACHE_FLASH_ATTR user_init(void)
 	uart_init(BIT_RATE_115200, BIT_RATE_115200);
 	os_delay_us(1000000);
 
-	CFG_Load();
-
 //	MQTT_InitConnection(&mqttClient, sysCfg.mqtt_host, sysCfg.mqtt_port, sysCfg.security);
-	MQTT_InitConnection(&mqttClient, "192.168.254.40", 1880, DEFAULT_SECURITY);
+	MQTT_InitConnection(&mqttClient, MQTT_HOST, MQTT_PORT, DEFAULT_SECURITY);
 
 //	MQTT_InitClient(&mqttClient, sysCfg.device_id, sysCfg.mqtt_user, sysCfg.mqtt_pass, sysCfg.mqtt_keepalive, 1);
 	MQTT_InitClient(&mqttClient, "EntranceLamp", "user", "pass", 120, 1);
@@ -157,7 +157,7 @@ void ICACHE_FLASH_ATTR user_init(void)
 	MQTT_OnData(&mqttClient, mqttDataCb);
 
 //	WIFI_Connect(sysCfg.sta_ssid, sysCfg.sta_pwd, wifiConnectCb);
-	WIFI_Connect(WIFI_CLIENTSSID, WIFI_CLIENTPASSWORD, wifiConnectCb);
+	WIFI_Connect(STA_SSID, STA_PASS, wifiConnectCb);
 
 	INFO("\r\nSystem started ...\r\n");
 }
