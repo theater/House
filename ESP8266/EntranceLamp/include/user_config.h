@@ -17,8 +17,8 @@
 
 // MQTT USER CONFIG
 #define MQTT_CLIENT_ID    "EntranceOutsideLight"
-#define MQTT_USER     ""
-#define MQTT_PASS     ""
+//#define MQTT_USER     ""
+//#define MQTT_PASS     ""
 #define MQTT_CLEAN_SESSION 1
 #define MQTT_KEEPALIVE 120
 
@@ -44,9 +44,6 @@
 #endif // __MQTT_CONFIG_H__
 
 #define PLATFORM_DEBUG		true
-
-#define CFG_HOLDER	0x00FF55A4  /* Change this value to load default configurations */
-#define CFG_LOCATION	0x3C	/* Please don't change or if you know what you doing */
 
 // Static definitions from MQTT user_init.c
 // GPIO settings - all GPIOs set as GPIO
@@ -78,7 +75,7 @@
 #define PIN_GPIO14_MUX PERIPHS_IO_MUX_MTDI_U
 #define PIN_GPIO14_FUNC FUNC_GPIO14
 
-//#define LRHEATER_MQTT_Temperature "LRHEATER_MQTT_Temperature"
+#define ENTRANCE_TEMPERATURE "home/floor1/entrance/temperature/1"
 
 
 char currGPIO2State;
@@ -91,6 +88,9 @@ char sTemperature[10];
 char sDate[20];
 
 #define sleepms(x) os_delay_us(x*1000);
+
+#define ON "ON"
+#define OFF "OFF"
 
 
 #endif

@@ -1,148 +1,74 @@
-/* main.c -- MQTT client example
-*
-* Copyright (c) 2014-2015, Tuan PM <tuanpm at live dot com>
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* * Redistributions of source code must retain the above copyright notice,
-* this list of conditions and the following disclaimer.
-* * Redistributions in binary form must reproduce the above copyright
-* notice, this list of conditions and the following disclaimer in the
-* documentation and/or other materials provided with the distribution.
-* * Neither the name of Redis nor the names of its contributors may be used
-* to endorse or promote products derived from this software without
-* specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*/
-#include "ets_sys.h"
-#include "driver/uart.h"
-#include "osapi.h"
-#include "mqtt.h"
-#include "wifi.h"
-#include "debug.h"
-#include "gpio.h"
-#include "user_interface.h"
-#include "mem.h"
+#include <c_types.h>
+#include <os_type.h>
+#include <osapi.h>
+#include <user_interface.h>
 
+#include "../include/driver/uart.h"
 #include "../include/user_config.h"
+#include "../include/userDS18B20.h"
+#include "../include/userMqtt.h"
+#include "../modules/include/wifi.h"
+#include "../mqtt/include/mqtt.h"
 
-MQTT_Client mqttClient;
-//MQTT_Client mqttClient;
-
-void ICACHE_FLASH_ATTR wifiConnectCb(uint8_t status)
-{
-	if(status == STATION_GOT_IP){
+void ICACHE_FLASH_ATTR wifiConnectCb(uint8_t status) {
+	if (status == STATION_GOT_IP) {
 		MQTT_Connect(&mqttClient);
-		INFO("Got IP !");
 	} else {
-//		MQTT_Disconnect(&mqttClient);
-		INFO("NO IP ! Disconnected...");
+		MQTT_Disconnect(&mqttClient);
 	}
 }
-void ICACHE_FLASH_ATTR mqttConnectedCb(uint32_t *args)
-{
-	MQTT_Client* client = (MQTT_Client*)args;
-	INFO("MQTT: Connected\r\n");
-	MQTT_Subscribe(&mqttClient, PIN_GPIO4_TOPIC, 0);
-//	MQTT_Publish(client, "/mqtt/topic/2", "hello2", 6, 2, 0);
+
+// DS18B20
+LOCAL void ICACHE_FLASH_ATTR ds18b20_cb(void *arg) {
+	INFO("DS18B20 CB executed\n");
+	ds18b20();
 }
 
-void mqttDisconnectedCb(uint32_t *args)
-{
-	MQTT_Client* client = (MQTT_Client*)args;
-	INFO("MQTT: Disconnected\r\n");
+void printConfiguration() {
+	//	put here some debug information
 }
 
-void ICACHE_FLASH_ATTR mqttPublishedCb(uint32_t *args)
-{
-	MQTT_Client* client = (MQTT_Client*)args;
-	INFO("MQTT: Published\r\n");
-}
+uint32 ICACHE_FLASH_ATTR user_rf_cal_sector_set(void) {
+	enum flash_size_map size_map = system_get_flash_size_map();
+	uint32 rf_cal_sec = 0;
 
-void ICACHE_FLASH_ATTR mqttDataCb(uint32_t *args, const char* topic, uint32_t topic_len,
-		const char *data, uint32_t data_len) {
-	char topicBuf[64], dataBuf[64];
-	MQTT_Client* client = (MQTT_Client*) args;
+	switch (size_map) {
+		case FLASH_SIZE_4M_MAP_256_256:
+			rf_cal_sec = 128 - 8;
+			break;
 
-	os_memcpy(topicBuf, topic, topic_len);
-	topicBuf[topic_len] = 0;
+		case FLASH_SIZE_8M_MAP_512_512:
+			rf_cal_sec = 256 - 5;
+			break;
 
-	os_memcpy(dataBuf, data, data_len);
-	dataBuf[data_len] = 0;
+		case FLASH_SIZE_16M_MAP_512_512:
+		case FLASH_SIZE_16M_MAP_1024_1024:
+			rf_cal_sec = 512 - 5;
+			break;
 
-	// GPIO4 handling here
-	if (strcmp(topicBuf, PIN_GPIO4_TOPIC) == 0) {
-		if (strcmp(dataBuf, "OFF") == 0) {
-			GPIO_OUTPUT_SET(PIN_GPIO4, 0);
-			INFO("GPIO4 set to OFF\r\n");
-			MQTT_Publish(&mqttClient, PIN_GPIO4_TOPIC_CB, "OFF", 3, 0, 0);
-		} else if (strcmp(dataBuf, "ON") == 0) {
-			GPIO_OUTPUT_SET(PIN_GPIO4, 1);
-			INFO("GPIO4 set to ON\r\n");
-			MQTT_Publish(&mqttClient, PIN_GPIO4_TOPIC_CB, "ON", 2, 0, 0);
-		}
+		case FLASH_SIZE_32M_MAP_512_512:
+		case FLASH_SIZE_32M_MAP_1024_1024:
+			rf_cal_sec = 1024 - 5;
+			break;
+
+		default:
+			rf_cal_sec = 0;
+			break;
 	}
-	// HERE ENDS THE BASIC LOGIC BY KONSTANTIN
 
-	//	INFO("GPIO2 State: %d",GPIO_INPUT_GET(PIN_GPIO));
-	INFO("MQTT topic: %s, data: %s \r\n", topicBuf, dataBuf);
-	os_free(topicBuf);
-	os_free(dataBuf);
+	return rf_cal_sec;
 }
 
-uint32 ICACHE_FLASH_ATTR user_rf_cal_sector_set(void)
-{
-    enum flash_size_map size_map = system_get_flash_size_map();
-    uint32 rf_cal_sec = 0;
-
-    switch (size_map) {
-        case FLASH_SIZE_4M_MAP_256_256:
-            rf_cal_sec = 128 - 8;
-            break;
-
-        case FLASH_SIZE_8M_MAP_512_512:
-            rf_cal_sec = 256 - 5;
-            break;
-
-        case FLASH_SIZE_16M_MAP_512_512:
-        case FLASH_SIZE_16M_MAP_1024_1024:
-            rf_cal_sec = 512 - 5;
-            break;
-
-        case FLASH_SIZE_32M_MAP_512_512:
-        case FLASH_SIZE_32M_MAP_1024_1024:
-            rf_cal_sec = 1024 - 5;
-            break;
-
-        default:
-            rf_cal_sec = 0;
-            break;
-    }
-
-    return rf_cal_sec;
+void ICACHE_FLASH_ATTR user_rf_pre_init(void) {
 }
 
-void ICACHE_FLASH_ATTR user_rf_pre_init(void)
-{
-}
-
-void ICACHE_FLASH_ATTR user_init(void)
-{
+void ICACHE_FLASH_ATTR user_init(void) {
 	uart_init(BIT_RATE_115200, BIT_RATE_115200);
 	os_delay_us(1000000);
+
+	#if defined(DEBUG_ON)
+		printConfiguration();
+	#endif
 
 //	MQTT_InitConnection(&mqttClient, sysCfg.mqtt_host, sysCfg.mqtt_port, sysCfg.security);
 	MQTT_InitConnection(&mqttClient, MQTT_HOST, MQTT_PORT, DEFAULT_SECURITY);
@@ -155,6 +81,11 @@ void ICACHE_FLASH_ATTR user_init(void)
 	MQTT_OnDisconnected(&mqttClient, mqttDisconnectedCb);
 	MQTT_OnPublished(&mqttClient, mqttPublishedCb);
 	MQTT_OnData(&mqttClient, mqttDataCb);
+
+	//DS18B20 timers
+	os_timer_disarm(&ds18b20_timer);
+	os_timer_setfn(&ds18b20_timer, (os_timer_func_t *) ds18b20_cb, (void *) 0);
+	os_timer_arm(&ds18b20_timer, DELAY, 1);
 
 //	WIFI_Connect(sysCfg.sta_ssid, sysCfg.sta_pwd, wifiConnectCb);
 	WIFI_Connect(STA_SSID, STA_PASS, wifiConnectCb);
