@@ -56,11 +56,15 @@ void publishTemperatureToMQTT(float temperature, const char* topic, char strConv
 void aquariumTriggerLogics(float waterTemperature, Mode mode, float desiredTemperature, PubSubClient *mqttClient) {
 	if (mode == AUTO) {
 		if (waterTemperature > desiredTemperature + 0.25) {
-			gpio(AQ_COOLER1_PIN, HIGH, AQ_COOLER1_CB_TOPIC, mqttClient);
 			gpio(AQ_HEATER1_PIN, LOW, AQ_HEATER1_CB_TOPIC, mqttClient);
-		} else if (waterTemperature < desiredTemperature - 0.25) {
-			gpio(AQ_HEATER1_PIN, HIGH, AQ_HEATER1_CB_TOPIC, mqttClient);
+			if(waterTemperature > desiredTemperature + 0.5) {
+				gpio(AQ_COOLER1_PIN, HIGH, AQ_COOLER1_CB_TOPIC, mqttClient);
+			}
+		} else if (waterTemperature < desiredTemperature) {
 			gpio(AQ_COOLER1_PIN, LOW, AQ_COOLER1_CB_TOPIC, mqttClient);
+			if (waterTemperature < desiredTemperature - 0.25) {
+				gpio(AQ_HEATER1_PIN, HIGH, AQ_HEATER1_CB_TOPIC, mqttClient);
+			}
 		}
 		delay(10);
 	}
@@ -95,7 +99,7 @@ void mqttTopicHandler(String topic, const char* payload, Mode *mode, float *desi
 //		Serial.print("Des:");
 //		Serial.println(*desiredTemperature);
 	} else if (topic == AQ_MODE_TOPIC) {
-		*mode = modeHandler(payload);
+		*mode = atoi(payload);
 	}
 }
 
@@ -115,17 +119,6 @@ void gpio(int pin, boolean state, const char* callbackTopic, PubSubClient *mqttC
 		digitalWrite(pin, LOW);
 		mqttClient->publish(callbackTopic,"OFF");
 	}
-}
-
-Mode modeHandler(String payload) {
-	if (payload == "OFF") {
-		return OFF;
-	} else if (payload == "MANUAL") {
-		return MANUAL;
-	} else if (payload == "AUTO") {
-		return AUTO;
-	}
-
 }
 
 //void ResetFunction(PubSubClient *mqttClient, ) {

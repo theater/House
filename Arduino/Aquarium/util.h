@@ -26,7 +26,6 @@ void pinCommandHandler(int pin, const char* callbackTopic, String payload,  Mode
 void aquariumTriggerLogics(float waterTemperature, Mode mode, float desiredTemperature, PubSubClient *mqttClient);
 void gpio(int dPin, boolean state, const char* callbackTopic, PubSubClient *mqttClient);
 
-Mode modeHandler(String payload);
 void oneWireTrigger(DallasTemperature *sensors, PubSubClient *mqttClient, Mode *mode, byte *desiredTemperature);
 
 
