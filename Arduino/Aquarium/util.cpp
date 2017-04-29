@@ -30,7 +30,7 @@ int mqttConnect(PubSubClient *mqttClient) {
 		return 1;
 }
 
-void oneWireTrigger(DallasTemperature *sensors, PubSubClient *mqttClient, Mode *mode, byte *desiredTemperature) {
+void oneWireTrigger(DallasTemperature *sensors, PubSubClient *mqttClient, Mode *mode, float *desiredTemperature) {
 	//  Start reading sensors...
 	sensors->requestTemperatures(); // Send the command to get temperatures from 1-wire
 	char strConvert[10];
@@ -53,13 +53,12 @@ void publishTemperatureToMQTT(float temperature, const char* topic, char strConv
 	}
 }
 
-void aquariumTriggerLogics(float waterTemperature, Mode mode, byte desiredTemperature, PubSubClient *mqttClient) {
+void aquariumTriggerLogics(float waterTemperature, Mode mode, float desiredTemperature, PubSubClient *mqttClient) {
 	if (mode == AUTO) {
 		if (waterTemperature > desiredTemperature + 0.25) {
 			gpio(AQ_COOLER1_PIN, HIGH, AQ_COOLER1_CB_TOPIC, mqttClient);
 			gpio(AQ_HEATER1_PIN, LOW, AQ_HEATER1_CB_TOPIC, mqttClient);
-		}
-		if (waterTemperature < desiredTemperature - 0.25) {
+		} else if (waterTemperature < desiredTemperature - 0.25) {
 			gpio(AQ_HEATER1_PIN, HIGH, AQ_HEATER1_CB_TOPIC, mqttClient);
 			gpio(AQ_COOLER1_PIN, LOW, AQ_COOLER1_CB_TOPIC, mqttClient);
 		}
@@ -67,7 +66,7 @@ void aquariumTriggerLogics(float waterTemperature, Mode mode, byte desiredTemper
 	}
 }
 
-void mqttCallback(char* topic, byte* payload, unsigned int length, Mode *mode, byte *desiredTemperature, PubSubClient *mqttClient) {
+void mqttCallback(char* topic, byte* payload, unsigned int length, Mode *mode, float *desiredTemperature, PubSubClient *mqttClient) {
 // ##### this function is the main part that triggers event based on the MQTT received messages. All the important input stuff is here...
 // ####### byte* to String transformation of payload starts here
 	char cPayload[10];
@@ -75,14 +74,13 @@ void mqttCallback(char* topic, byte* payload, unsigned int length, Mode *mode, b
 		cPayload[i] = (char) payload[i];
 	}
 	cPayload[length] = '\0';
-	String strPayload = String(cPayload);
 // ####### byte* to String transformation ends here
 
 // #### Real work/Logics start here. Using IFs to destinguish for the different MQTT subscriptions/relays (unfortunalte string not allowed in switch operator) :(
-	mqttTopicHandler(topic, strPayload, mode, desiredTemperature, mqttClient);
+	mqttTopicHandler(topic, cPayload, mode, desiredTemperature, mqttClient);
 }
 
-void mqttTopicHandler(String topic, String payload, Mode *mode, byte *desiredTemperature, PubSubClient *mqttClient) {
+void mqttTopicHandler(String topic, const char* payload, Mode *mode, float *desiredTemperature, PubSubClient *mqttClient) {
 	if (topic == AQ_LIGHTS_TOPIC) {
 		pinCommandHandler(AQ_LIGHTS1_PIN, AQ_LIGHTS_CB_TOPIC, payload, *mode, mqttClient);
 	} else if (topic == AQ_HEATER1_TOPIC) {
@@ -90,10 +88,12 @@ void mqttTopicHandler(String topic, String payload, Mode *mode, byte *desiredTem
 	} else if (topic == AQ_COOLER1_TOPIC) {
 		pinCommandHandler(AQ_COOLER1_PIN, AQ_COOLER1_CB_TOPIC, payload, *mode, mqttClient);
 	} else if (topic == AQ_DESIRED_TEMPERATURE_TOPIC) {
-		int convertedDesiredTemperature = payload.toInt();
+		float convertedDesiredTemperature = atof(payload);
 		if(convertedDesiredTemperature) {
 			*desiredTemperature = convertedDesiredTemperature;
 		}
+//		Serial.print("Des:");
+//		Serial.println(*desiredTemperature);
 	} else if (topic == AQ_MODE_TOPIC) {
 		*mode = modeHandler(payload);
 	}
@@ -125,6 +125,7 @@ Mode modeHandler(String payload) {
 	} else if (payload == "AUTO") {
 		return AUTO;
 	}
+
 }
 
 //void ResetFunction(PubSubClient *mqttClient, ) {

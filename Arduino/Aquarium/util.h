@@ -15,15 +15,15 @@ enum Mode {
 	OFF, MANUAL, AUTO
 };
 
-void oneWireTrigger(DallasTemperature *sensors, PubSubClient *mqttClient, Mode *mode, byte *desiredTemperature);
+void oneWireTrigger(DallasTemperature *sensors, PubSubClient *mqttClient, Mode *mode, float *desiredTemperature);
 
-void mqttCallback(char* topic, byte* payload, unsigned int length, Mode *mode, byte *desiredTemperature, PubSubClient *mqttClient);
+void mqttCallback(char* topic, byte* payload, unsigned int length, Mode *mode, float *desiredTemperature, PubSubClient *mqttClient);
 void publishTemperatureToMQTT(float waterTemperature, const char* topic, char strConvert[10], PubSubClient* mqttClient);
 int mqttConnect(PubSubClient *mqttClient);
-void mqttTopicHandler(String topic, String payload, Mode *mode, byte *desiredTemperature, PubSubClient *mqttClient);
+void mqttTopicHandler(String topic, const char* payload, Mode *mode, float *desiredTemperature, PubSubClient *mqttClient);
 void pinCommandHandler(int pin, const char* callbackTopic, String payload,  Mode mode, PubSubClient *mqttClient);
 
-void aquariumTriggerLogics(float waterTemperature, Mode mode, byte desiredTemperature, PubSubClient *mqttClient);
+void aquariumTriggerLogics(float waterTemperature, Mode mode, float desiredTemperature, PubSubClient *mqttClient);
 void gpio(int dPin, boolean state, const char* callbackTopic, PubSubClient *mqttClient);
 
 Mode modeHandler(String payload);

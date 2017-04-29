@@ -29,7 +29,7 @@ EthernetClient ethClient;
 void mqttCallbackFunction(char* topic, byte* payload, unsigned int length);
 PubSubClient mqttClient(server, 1883, mqttCallbackFunction, ethClient);
 
-byte desiredTemperature;
+float desiredTemperature;
 Mode mode;
 
 //Do not add code below this line

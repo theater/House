@@ -39,12 +39,12 @@
 		<link>
 			<name>core/core</name>
 			<type>2</type>
-			<location>C:/EclipseCPPNeon/arduinoPlugin/packages/arduino/hardware/avr/1.6.5/cores/arduino</location>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.18/cores/arduino</locationURI>
 		</link>
 		<link>
 			<name>core/variant</name>
 			<type>2</type>
-			<location>C:/EclipseCPPNeon/arduinoPlugin/packages/arduino/hardware/avr/1.6.5/variants/eightanaloginputs</location>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/arduino/hardware/avr/1.6.18/variants/eightanaloginputs</locationURI>
 		</link>
 		<link>
 			<name>libraries/DallasTemperature</name>
