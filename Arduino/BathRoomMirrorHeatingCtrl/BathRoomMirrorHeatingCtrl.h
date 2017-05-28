@@ -16,25 +16,24 @@
 
 // PINS:
 #define INPUT_PIN_IR_TRIGGER 3
-#define HEAT_PIN 6
-#define LIGHTS_PIN 5
-#define DHT_PIN 8
+#define HEAT_PIN 7
+#define LIGHTS_PIN 6
+#define DHT_PIN 5
 
 // PROXIMITY SENSOR SETTINGS
-#define TIMER_OFFSET 20000
-#define DEBOUNCE_TIMEOUT 200
-#define REATTACH_INTERRUPT_OFFSET 1000
+#define OFF_TIME_TIMER_OFFSET 900000 // 15 min
+#define DEBOUNCE_TIMEOUT 50
+#define REATTACH_INTERRUPT_OFFSET 1500 // reattach interrupt 1s after first trigger.
+
 // DHT SENSOR TIMER SETTINGS
 #define DHT_TIMER_EVERY 30000
-
-bool debug = true;
 
 struct DhtSensorData {
 	float humidity;
 	float temperature;
 };
 
-void setRelay(byte pin, boolean state);
+void setRelay(byte pin, byte state);
 void decisionMaker();
 void readDhtInfo();
 void offTimerExpired();
