@@ -13,20 +13,20 @@
 
 // TRESHOLDS
 #define HUMIDITY_TRESHOLD 65
+#define ANALOG_TRESHOLD 350
 
 // PINS:
-#define INPUT_PIN_IR_TRIGGER 3
+#define INPUT_PIN_IR_TRIGGER A2			// IR pin is Analog 2
 #define HEAT_PIN 7
 #define LIGHTS_PIN 6
 #define DHT_PIN 5
 
 // PROXIMITY SENSOR SETTINGS
-#define OFF_TIME_TIMER_OFFSET 900000 // 15 min
-#define DEBOUNCE_TIMEOUT 50
-#define REATTACH_INTERRUPT_OFFSET 1500 // reattach interrupt 1s after first trigger.
+#define OFF_TIME_TIMER_OFFSET 900000 	// 15 min hard off time
+#define RESET_ANALOG_SENSOR_READING 500 // something like debounce time
 
 // DHT SENSOR TIMER SETTINGS
-#define DHT_TIMER_EVERY 30000
+#define DHT_TIMER_EVERY 30000			// DHT read on every 30 sec
 
 struct DhtSensorData {
 	float humidity;
@@ -41,6 +41,8 @@ void userInputDetected();
 void reattachInterrupt();
 boolean lightIsOn();
 boolean heatingIsOn();
+void analogReadInputPin();
+void resetReadingAndUpdateDecision();
 
 //Do not add code below this line
 #endif /* _BathRoomMirrorHeatingCtrl_H_ */

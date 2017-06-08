@@ -7,14 +7,16 @@
 #include "D:/HomeAutomation/ArduinoLibs/DHT/DHT.h"
 #include "D:/HomeAutomation/ArduinoLibs/Timer/Timer.h"
 
-Timer reattachInterruptTimer;
+Timer resetAnalogPinTimer;
 Timer offTimer;
-Timer sensorReadTimer;
+Timer humiditySensorReadTimer;
 DHT dhtSensor(DHT_PIN, DHT22);
 volatile DhtSensorData sensorData;
 volatile boolean isHeatingAndLightDesired;
+volatile int analogSensorReading;
 
 bool debug = true;
+bool ignoreHumiditySensor = true;
 
 //The setup function is called once at startup of the sketch
 void setup() {
@@ -26,7 +28,8 @@ void setup() {
 	sensorData.humidity = 55;
 
 	pinMode(INPUT_PIN_IR_TRIGGER, INPUT);
-	attachInterrupt(digitalPinToInterrupt(INPUT_PIN_IR_TRIGGER), userInputDetected, RISING);
+	analogReadInputPin();
+	resetAnalogPinTimer.every(RESET_ANALOG_SENSOR_READING, resetReadingAndUpdateDecision);
 
 	pinMode(LIGHTS_PIN, OUTPUT);
 	setRelay(LIGHTS_PIN, OFF);
@@ -36,39 +39,28 @@ void setup() {
 
 	dhtSensor.begin();
 	readDhtInfo();
-	sensorReadTimer.every(DHT_TIMER_EVERY, readDhtInfo);
+	humiditySensorReadTimer.every(DHT_TIMER_EVERY, readDhtInfo);
 	Serial.println("Setup ends here...");
 }
 
 // The loop function is called in an endless loop
 void loop() {
 	offTimer.update();
-	sensorReadTimer.update();
-	reattachInterruptTimer.update();
+	humiditySensorReadTimer.update();
+	resetAnalogPinTimer.update();
 	decisionMaker();
+	analogReadInputPin();
 }
 
-void userInputDetected() {
-	detachInterrupt(digitalPinToInterrupt(INPUT_PIN_IR_TRIGGER));
-	if(debug) {
-		Serial.println("IR triggered");
-		Serial.println(isHeatingAndLightDesired);
+void resetReadingAndUpdateDecision() {
+	if(analogSensorReading > ANALOG_TRESHOLD) {
+		isHeatingAndLightDesired = !isHeatingAndLightDesired;
 	}
-	delay(15);
-	if (digitalRead(INPUT_PIN_IR_TRIGGER)) {
-		delay(DEBOUNCE_TIMEOUT);
-		if (digitalRead(INPUT_PIN_IR_TRIGGER)) {
-			isHeatingAndLightDesired = !isHeatingAndLightDesired;
-			if (isHeatingAndLightDesired) {
-				offTimer.after(OFF_TIME_TIMER_OFFSET, offTimerExpired);
-			} else {
-				offTimer.stop(0);
-			}
-		}
-	}
-	delay(REATTACH_INTERRUPT_OFFSET);
-	attachInterrupt(digitalPinToInterrupt(INPUT_PIN_IR_TRIGGER), userInputDetected, RISING);
-	Serial.println(isHeatingAndLightDesired);
+	Serial.print("AnalogSensor last value:");
+	Serial.println(analogSensorReading);
+	analogSensorReading = 0;
+	Serial.print("AnalogSensor new value:");
+	Serial.println(analogSensorReading);
 }
 
 void offTimerExpired() {
@@ -80,7 +72,7 @@ void reattachInterrupt() {
 		Serial.println("ReattachInterrupt triggered");
 	}
 	attachInterrupt(digitalPinToInterrupt(INPUT_PIN_IR_TRIGGER), userInputDetected, RISING);
-	reattachInterruptTimer.stop(millis());
+	resetAnalogPinTimer.stop(millis());
 }
 
 void readDhtInfo() {
@@ -91,10 +83,14 @@ void readDhtInfo() {
 	if(humidity > 0 && temperature > -30) {
 		sensorData.humidity = humidity;
 		sensorData.temperature = temperature;
-	} else if(debug) {
-		Serial.println("DHT wrong data received...");
-		Serial.print("Humidity:"); Serial.println(humidity);
-		Serial.print("Temperature:"); Serial.println(temperature);
+		ignoreHumiditySensor = false;
+	} else  {
+		ignoreHumiditySensor = true;
+		if(debug) {
+			Serial.println("DHT wrong data received...");
+			Serial.print("Humidity:"); Serial.println(humidity);
+			Serial.print("Temperature:"); Serial.println(temperature);
+		}
 	}
 	if(debug) {
 //		sensorData.humidity = random(100);
@@ -110,7 +106,7 @@ void decisionMaker() {
 		if(!lightIsOn()) {
 			setRelay(LIGHTS_PIN, ON);
 		}
-		if(sensorData.humidity > HUMIDITY_TRESHOLD && !heatingIsOn()) {
+		if((sensorData.humidity > HUMIDITY_TRESHOLD || ignoreHumiditySensor) && !heatingIsOn()) {
 			setRelay(HEAT_PIN, ON);
 		}
 	} else {
@@ -136,4 +132,11 @@ boolean lightIsOn() {
 
 boolean heatingIsOn() {
 	return digitalRead(HEAT_PIN);
+}
+
+void analogReadInputPin() {
+	int sensorReading = analogRead(INPUT_PIN_IR_TRIGGER);
+	if(sensorReading > 100 && sensorReading > analogSensorReading) {
+		analogSensorReading = sensorReading;
+	}
 }
