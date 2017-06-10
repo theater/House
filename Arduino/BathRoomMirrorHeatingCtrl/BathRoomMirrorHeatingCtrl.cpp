@@ -55,12 +55,19 @@ void loop() {
 void resetReadingAndUpdateDecision() {
 	if(analogSensorReading > ANALOG_TRESHOLD) {
 		isHeatingAndLightDesired = !isHeatingAndLightDesired;
+		if(isHeatingAndLightDesired) {
+			offTimer.after(OFF_TIME_TIMER_OFFSET, offTimerExpired);
+		} else {
+			offTimer.stop(0);
+		}
 	}
-	Serial.print("AnalogSensor last value:");
-	Serial.println(analogSensorReading);
+
+	if(debug) {
+		Serial.print("AnalogSensor last value:");
+		Serial.println(analogSensorReading);
+	}
+
 	analogSensorReading = 0;
-	Serial.print("AnalogSensor new value:");
-	Serial.println(analogSensorReading);
 }
 
 void offTimerExpired() {
