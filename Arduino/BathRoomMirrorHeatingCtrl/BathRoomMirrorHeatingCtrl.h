@@ -23,7 +23,8 @@
 
 // PROXIMITY SENSOR SETTINGS
 #define OFF_TIME_TIMER_OFFSET 900000 	// 15 min hard off time
-#define RESET_ANALOG_SENSOR_READING 500 // something like debounce time
+#define RESET_ANALOG_SENSOR_READING 380
+#define ANALOG_SENSOR_DEBOUNCE_TIME 15
 
 // DHT SENSOR TIMER SETTINGS
 #define DHT_TIMER_EVERY 30000			// DHT read on every 30 sec
@@ -34,15 +35,14 @@ struct DhtSensorData {
 };
 
 void setRelay(byte pin, byte state);
-void decisionMaker();
+void outputControlDecisionMaker();
 void readDhtInfo();
 void offTimerExpired();
 void userInputDetected();
-void reattachInterrupt();
 boolean lightIsOn();
 boolean heatingIsOn();
 void analogReadInputPin();
-void resetReadingAndUpdateDecision();
+void analogUpdateReadingDecision(int sensorReading);
 
 //Do not add code below this line
 #endif /* _BathRoomMirrorHeatingCtrl_H_ */
