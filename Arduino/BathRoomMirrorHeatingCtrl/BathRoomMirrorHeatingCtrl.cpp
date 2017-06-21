@@ -59,7 +59,8 @@ void loop() {
 }
 
 void offTimerExpired() {
-	isHeatingAndLightDesired = false;;
+	isHeatingAndLightDesired = false;
+	offTimer.stop(0);
 }
 
 void readDhtInfo() {
