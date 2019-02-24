@@ -15,10 +15,11 @@
 
 //add your function definitions for the project BathFanControl here
 int retrieveHumidity();
-int retrieveTemperature();
-void humidityControl(int);
+float retrieveTemperature();
+void controlHumidity(int humidityValue);
 void updatePinState(Pin pin, const byte state);
 void mqttCallback(char* topic, byte* payload, unsigned int length);
+void publishValueMqtt(double value, const char* topic);
 
 //Do not add code below this line
 #endif /* _BathFanControl_H_ */
