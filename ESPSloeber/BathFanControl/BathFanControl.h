@@ -20,6 +20,7 @@ void controlHumidity(int humidityValue);
 void updatePinState(Pin pin, const byte state);
 void mqttCallback(char* topic, byte* payload, unsigned int length);
 void publishValueMqtt(double value, const char* topic);
+void timerUpdate();
 
 //Do not add code below this line
 #endif /* _BathFanControl_H_ */

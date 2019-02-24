@@ -5,6 +5,8 @@
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>
 #include <DHT.h>
+#include <Timer.h>
+
 #include "Util.h"
 
 // Constants
@@ -24,19 +26,26 @@ const Pin FAN_SPEED_PIN = Pin(2, "home/floor1/bathroom/fan/speed");
 
 const char* DHT_HUMIDITY_TOPIC = "home/floor1/bathroom/humidity/1";
 const char* DHT_TEMPERATURE_TOPIC = "home/floor1/bathroom/temperature/1";
+const char* MODE_TOPIC = "home/floor1/bathroom/mode";
 const int DHT_PIN = 13;
 
 const byte OFF = 0;
 const byte ON = 1;
 
+const unsigned REOCCURRENCE = 30000;
+
 // Variables
 float humiditySensorValue = 60;
 float temperatureSensorValue = 20;
-DHT sensor(DHT_PIN, DHT22);
 
 // Objects
-WiFiClient espClient;
-PubSubClient mqttClient(espClient);
+WiFiClient wifiClient;
+//PubSubClient mqttClient(wifiClient);
+PubSubClient mqttClient(MQTT_SERVER, 1883, mqttCallback, wifiClient);
+DHT sensor(DHT_PIN, DHT22);
+
+// Timers
+Timer sensorsUpdateTrigger;
 
 // Functions
 void initializeGpioPinModes() {
@@ -50,38 +59,41 @@ void loopUntilConnected() {
 	}
 
 	mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
-	mqttClient.setCallback(mqttCallback);
+//	mqttClient.setCallback(mqttCallback);
 
 	while (!mqttClient.connected()) {
 		Serial.println("Connecting to MQTT...");
 
 		if (mqttClient.connect(MQTT_CLIENT_NAME, "user", "password")) {
-			Serial.println("connected");
+			Serial.println("MQTT connected sucessfully");
 		} else {
 			Serial.print("failed with state ");
 			Serial.println(mqttClient.state());
-			delay(2000);
+			delay(5000);
 		}
 	}
 
 	mqttClient.publish(MQTT_CLIENT_NAME, "Hello from BATHROOM-FLOOR1");
-//	  mqttClient.subscribe("esp/test");
 }
 
 void setup() {
 	delay(1000);
 	Serial.begin(115200);
 	loopUntilConnected();
+    mqttClient.subscribe(MODE_TOPIC);
+
 	initializeGpioPinModes();
 	sensor.begin();
+
+	sensorsUpdateTrigger.every(REOCCURRENCE, &timerUpdate);
+
+	timerUpdate();
 }
 
-void loop() {
-	Serial.println("Start of loop...");
+void timerUpdate() {
 	humiditySensorValue = retrieveHumidity();
 	temperatureSensorValue = retrieveTemperature();
 	controlHumidity(humiditySensorValue);
-	delay(5000);
 }
 
 int retrieveHumidity() {
@@ -139,5 +151,16 @@ void updatePinState(Pin pin, const byte state) {
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
-	Serial.printf("Received message: topic=%s, paylod=%s, length=%d", topic, payload, length);
+	Serial.println("Received update via MQTT ! ! !");
+	char cPayload[10];
+	for (unsigned int i = 0; i <= length; i++) {
+		cPayload[i] = (char) payload[i];
+	}
+	cPayload[length] = '\0';
+	Serial.printf("Received message: topic=%s, payload=%s\n", topic, cPayload);
+}
+
+void loop() {
+	sensorsUpdateTrigger.update();
+	mqttClient.loop();
 }
