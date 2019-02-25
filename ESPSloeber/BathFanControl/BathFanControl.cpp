@@ -23,35 +23,55 @@ const int HIGH_TRESHOLD_VALUE = 80;
 
 const Pin FAN_POWER_PIN = Pin(0, "home/floor1/bathroom/fan/state");
 const Pin FAN_SPEED_PIN = Pin(2, "home/floor1/bathroom/fan/speed");
+const int DHT_PIN = 4;
+const int SWITCH_PIN = 13;
 
 const char* DHT_HUMIDITY_TOPIC = "home/floor1/bathroom/humidity/1";
 const char* DHT_TEMPERATURE_TOPIC = "home/floor1/bathroom/temperature/1";
 const char* MODE_TOPIC = "home/floor1/bathroom/mode";
-const int DHT_PIN = 13;
 
 const byte OFF = 0;
 const byte ON = 1;
 
 const unsigned REOCCURRENCE = 30000;
+const unsigned DEBOUNCE_VALUE = 300;
 
 // Variables
 float humiditySensorValue = 60;
 float temperatureSensorValue = 20;
+uint32_t interruptTime = 0;
 
 // Objects
 WiFiClient wifiClient;
 //PubSubClient mqttClient(wifiClient);
 PubSubClient mqttClient(MQTT_SERVER, 1883, mqttCallback, wifiClient);
-DHT sensor(DHT_PIN, DHT22);
+DHT sensor(4, DHT22);
 
 // Timers
 Timer sensorsUpdateTrigger;
 
 // Functions
+void handleInterrupt() {
+	if (millis() - interruptTime > DEBOUNCE_VALUE) {
+		int pin = FAN_POWER_PIN.getPin();
+		detachInterrupt(pin);
+
+		Serial.println("Interrupt");
+		int pinState = digitalRead(pin);
+		updatePinState(FAN_POWER_PIN, !pinState);
+
+
+		interruptTime = millis();
+		attachInterrupt(digitalPinToInterrupt(SWITCH_PIN), handleInterrupt, CHANGE);
+	}
+}
+
 void initializeGpioPinModes() {
 	pinMode(FAN_POWER_PIN.getPin(), OUTPUT);
 	pinMode(FAN_SPEED_PIN.getPin(), OUTPUT);
 	pinMode(DHT_PIN, INPUT_PULLUP);
+	pinMode(SWITCH_PIN, INPUT_PULLUP);
+	attachInterrupt(digitalPinToInterrupt(SWITCH_PIN), handleInterrupt, CHANGE);
 }
 
 void loopUntilConnected() {
@@ -80,7 +100,7 @@ void setup() {
 	delay(1000);
 	Serial.begin(115200);
 	loopUntilConnected();
-    mqttClient.subscribe(MODE_TOPIC);
+	mqttClient.subscribe(MODE_TOPIC);
 
 	initializeGpioPinModes();
 	sensor.begin();
@@ -147,6 +167,10 @@ void controlHumidity(int humidityValue) {
 
 void updatePinState(Pin pin, const byte state) {
 	digitalWrite(pin.getPin(), state);
+	Serial.print("Updated pin ");
+	Serial.print(pin.getPin());
+	Serial.print(" to ");
+	Serial.println(state);
 	mqttClient.publish(pin.getTopic(), state ? "ON" : "OFF");
 }
 
