@@ -6,35 +6,42 @@
 #include <ESP8266WiFi.h>
 #include <DHT.h>
 #include <Timer.h>
-
+#include <eeprom.h>
 #include "Util.h"
 
 // Constants
-const bool SIMULATED = false;
-const char* SSID = "KLP";
-const char* PASSWORD = "charly78";
-const IPAddress MQTT_SERVER = IPAddress( {
-		192, 168, 254, 40 });
-const int MQTT_PORT = 1883;
-const char* MQTT_CLIENT_NAME = "ESP_BATH_FLOOR1";
-const int DESIRED_HUMIDITY = 60;
-const int LOW_TRESHOLD_VALUE = 70;
-const int HIGH_TRESHOLD_VALUE = 80;
-
-const Pin FAN_POWER_PIN = Pin(0, "home/floor1/bathroom/fan/state");
-const Pin FAN_SPEED_PIN = Pin(2, "home/floor1/bathroom/fan/speed");
+const unsigned MQTT_TOPICS_LENGTH = 60;
 const int DHT_PIN = 4;
-const int SWITCH_PIN = 13;
+const byte LOW_SPEED = 0;
+const byte HIGH_SPEED = 1;
 
-const char* DHT_HUMIDITY_TOPIC = "home/floor1/bathroom/humidity/1";
-const char* DHT_TEMPERATURE_TOPIC = "home/floor1/bathroom/temperature/1";
-const char* MODE_TOPIC = "home/floor1/bathroom/mode";
+// Configuration
+class {
+	public:
+		bool isSimulated = false;
+		char ssid[15] = "KLP";
+		char ssidPassword[15] = "charly78";
+		IPAddress mqttServerAddress = IPAddress( {
+				192, 168, 254, 40 });
+		int mqttPort = 1883;
+		char mqttClientName[20] = "ESP_BATH_FLOOR1";
+		int mode = 2;
+		int desiredHumidity = 60;
+		int lowSpeedTreshold = 70;
+		int highSpeedTreshold = 80;
+		char fanSpeedMqttTopic[MQTT_TOPICS_LENGTH] = "home/floor1/bathroom/fan/speed";
+		char humidityMqttTopic[MQTT_TOPICS_LENGTH] = "home/floor1/bathroom/humidity/1";
+		char temperatureMqttTopic[MQTT_TOPICS_LENGTH] = "home/floor1/bathroom/temperature/1";
+		char modeMqttTopic[MQTT_TOPICS_LENGTH] = "home/floor1/bathroom/mode";
+		char desiredHumidityMqttTopic[MQTT_TOPICS_LENGTH] = "home/floor1/bathroom/humidity/desired";
+		unsigned sensorsUpdateReocurrenceIntervalMillis = 30000;
 
-const byte OFF = 0;
-const byte ON = 1;
+		void print() {
+			Serial.printf("Current mode set to %d \n", mode);
+		}
+} configData;
 
-const unsigned REOCCURRENCE = 30000;
-const unsigned DEBOUNCE_VALUE = 300;
+const Pin FAN_SPEED_PIN = Pin(2, configData.fanSpeedMqttTopic);
 
 // Variables
 float humiditySensorValue = 60;
@@ -43,48 +50,26 @@ uint32_t interruptTime = 0;
 
 // Objects
 WiFiClient wifiClient;
-//PubSubClient mqttClient(wifiClient);
-PubSubClient mqttClient(MQTT_SERVER, 1883, mqttCallback, wifiClient);
-DHT sensor(4, DHT22);
+PubSubClient mqttClient(configData.mqttServerAddress, 1883, mqttCallback, wifiClient);
+DHT sensor(DHT_PIN, DHT22);
 
 // Timers
 Timer sensorsUpdateTrigger;
 
-// Functions
-void handleInterrupt() {
-	if (millis() - interruptTime > DEBOUNCE_VALUE) {
-		int pin = FAN_POWER_PIN.getPin();
-		detachInterrupt(pin);
-
-		Serial.println("Interrupt");
-		int pinState = digitalRead(pin);
-		updatePinState(FAN_POWER_PIN, !pinState);
-
-
-		interruptTime = millis();
-		attachInterrupt(digitalPinToInterrupt(SWITCH_PIN), handleInterrupt, CHANGE);
-	}
-}
-
 void initializeGpioPinModes() {
-	pinMode(FAN_POWER_PIN.getPin(), OUTPUT);
 	pinMode(FAN_SPEED_PIN.getPin(), OUTPUT);
 	pinMode(DHT_PIN, INPUT_PULLUP);
-	pinMode(SWITCH_PIN, INPUT_PULLUP);
-	attachInterrupt(digitalPinToInterrupt(SWITCH_PIN), handleInterrupt, CHANGE);
 }
 
 void loopUntilConnected() {
-	while (!wifiConnect(SSID, PASSWORD)) {
+	while (!wifiConnect(configData.ssid, configData.ssidPassword)) {
+		// Loop until connected
 	}
-
-	mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
-//	mqttClient.setCallback(mqttCallback);
 
 	while (!mqttClient.connected()) {
 		Serial.println("Connecting to MQTT...");
 
-		if (mqttClient.connect(MQTT_CLIENT_NAME, "user", "password")) {
+		if (mqttClient.connect(configData.mqttClientName, "user", "password")) {
 			Serial.println("MQTT connected sucessfully");
 		} else {
 			Serial.print("failed with state ");
@@ -93,19 +78,27 @@ void loopUntilConnected() {
 		}
 	}
 
-	mqttClient.publish(MQTT_CLIENT_NAME, "Hello from BATHROOM-FLOOR1");
+	mqttClient.publish(configData.mqttClientName, "Hello from BATHROOM-FLOOR1");
+}
+
+void subscribeToMqttTopics() {
+	mqttClient.subscribe(configData.modeMqttTopic);
+	mqttClient.subscribe(configData.desiredHumidityMqttTopic);
 }
 
 void setup() {
 	delay(1000);
 	Serial.begin(115200);
 	loopUntilConnected();
-	mqttClient.subscribe(MODE_TOPIC);
+
+	loadConfigEPROM();
+
+	subscribeToMqttTopics();
 
 	initializeGpioPinModes();
 	sensor.begin();
 
-	sensorsUpdateTrigger.every(REOCCURRENCE, &timerUpdate);
+	sensorsUpdateTrigger.every(configData.sensorsUpdateReocurrenceIntervalMillis, &timerUpdate);
 
 	timerUpdate();
 }
@@ -117,19 +110,19 @@ void timerUpdate() {
 }
 
 int retrieveHumidity() {
-	float value = SIMULATED ? random(40, 100) : sensor.readHumidity();
+	float value = configData.isSimulated ? random(40, 100) : sensor.readHumidity();
 	if (isnan(value)) {
 		Serial.println("Problem reading sensor value.");
 		return -999;
 	}
 	int result = (int) value;
 	Serial.printf("Humidity sensor value: %d \n", result);
-	publishValueMqtt(result, DHT_HUMIDITY_TOPIC);
+	publishValueMqtt(result, configData.humidityMqttTopic);
 	return result;
 }
 
 float retrieveTemperature() {
-	float value = SIMULATED ? random(15, 30) : sensor.readTemperature();
+	float value = configData.isSimulated ? random(15, 30) : sensor.readTemperature();
 	if (isnan(value)) {
 		Serial.println("Problem reading sensor value.");
 		return -999;
@@ -137,7 +130,7 @@ float retrieveTemperature() {
 
 	Serial.print("Temperature sensor value:");
 	Serial.println(value);
-	publishValueMqtt(value, DHT_TEMPERATURE_TOPIC);
+	publishValueMqtt(value, configData.temperatureMqttTopic);
 	return value;
 }
 
@@ -149,19 +142,15 @@ void publishValueMqtt(double value, const char* topic) {
 
 void controlHumidity(int humidityValue) {
 	Serial.printf("Measured humidity value: %d \n", humidityValue);
-	if (humidityValue > DESIRED_HUMIDITY) {
-		if (humidityValue > HIGH_TRESHOLD_VALUE) {
-			updatePinState(FAN_SPEED_PIN, ON);
+	if (humidityValue > configData.desiredHumidity) {
+		if (humidityValue > configData.highSpeedTreshold) {
+			updatePinState(FAN_SPEED_PIN, HIGH_SPEED);
 		} else {
-			updatePinState(FAN_SPEED_PIN, OFF);
+			updatePinState(FAN_SPEED_PIN, LOW_SPEED);
 		}
-
-		updatePinState(FAN_POWER_PIN, ON);
 	} else {
-		updatePinState(FAN_POWER_PIN, OFF);
-		updatePinState(FAN_SPEED_PIN, OFF);
+		updatePinState(FAN_SPEED_PIN, LOW_SPEED);
 	}
-	Serial.printf("Fan power pin state = %d\n", digitalRead(FAN_POWER_PIN.getPin()));
 	Serial.printf("Fan speed pin state = %d\n", digitalRead(FAN_SPEED_PIN.getPin()));
 }
 
@@ -174,7 +163,7 @@ void updatePinState(Pin pin, const byte state) {
 	mqttClient.publish(pin.getTopic(), state ? "ON" : "OFF");
 }
 
-void mqttCallback(char* topic, byte* payload, unsigned int length) {
+void mqttCallback(const char* topic, const byte* payload, const unsigned int length) {
 	Serial.println("Received update via MQTT ! ! !");
 	char cPayload[10];
 	for (unsigned int i = 0; i <= length; i++) {
@@ -182,6 +171,32 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 	}
 	cPayload[length] = '\0';
 	Serial.printf("Received message: topic=%s, payload=%s\n", topic, cPayload);
+
+	bool configUpdated = false;
+	if (strcmp(topic, configData.modeMqttTopic) == 0) {
+		configUpdated = true;
+		configData.mode = atoi(cPayload);
+		Serial.printf("Configuration to be updated. Mode=%d\n",configData.mode);
+	}
+
+	if (configUpdated) {
+		Serial.println("Writing config to EPROM");
+		writeConfigToEPROM();
+	}
+}
+
+void loadConfigEPROM() {
+	Serial.printf("Loading config from EPROM...");
+	EEPROM.begin(512);
+	EEPROM.get(0, configData);
+	configData.print();
+
+}
+
+void writeConfigToEPROM() {
+	EEPROM.begin(512);
+	EEPROM.put(0, configData);
+	EEPROM.commit();
 }
 
 void loop() {

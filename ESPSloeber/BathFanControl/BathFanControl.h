@@ -18,9 +18,13 @@ int retrieveHumidity();
 float retrieveTemperature();
 void controlHumidity(int humidityValue);
 void updatePinState(Pin pin, const byte state);
-void mqttCallback(char* topic, byte* payload, unsigned int length);
+void mqttCallback(const char* topic, const byte* payload, const unsigned int length);
 void publishValueMqtt(double value, const char* topic);
 void timerUpdate();
+void writeConfigToEPROM();
+void loadConfigEPROM();
+
+enum MODE {OFF=0, ON=1, AUTO=2};
 
 //Do not add code below this line
 #endif /* _BathFanControl_H_ */
