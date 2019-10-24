@@ -42,9 +42,34 @@
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/esp8266/hardware/esp8266/2.3.0/variants/generic</locationURI>
 		</link>
 		<link>
+			<name>libraries/Adafruit_Sensor</name>
+			<type>2</type>
+			<location>D:/src/adafruit/Adafruit_Sensor</location>
+		</link>
+		<link>
+			<name>libraries/DHT-sensor-library</name>
+			<type>2</type>
+			<location>D:/src/adafruit/DHT-sensor-library</location>
+		</link>
+		<link>
+			<name>libraries/DallasTemperature</name>
+			<type>2</type>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/libraries/DallasTemperature/3.7.6</locationURI>
+		</link>
+		<link>
+			<name>libraries/EEPROM</name>
+			<type>2</type>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM</locationURI>
+		</link>
+		<link>
 			<name>libraries/ESP8266WiFi</name>
 			<type>2</type>
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WiFi</locationURI>
+		</link>
+		<link>
+			<name>libraries/OneWire</name>
+			<type>2</type>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/libraries/OneWire/2.3.3</locationURI>
 		</link>
 		<link>
 			<name>libraries/PubSubClient</name>
@@ -52,9 +77,24 @@
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/libraries/PubSubClient/2.6.0</locationURI>
 		</link>
 		<link>
+			<name>libraries/Room</name>
+			<type>2</type>
+			<location>D:/src/ArduinoMega/Library/Room</location>
+		</link>
+		<link>
 			<name>libraries/SPI</name>
 			<type>2</type>
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/esp8266/hardware/esp8266/2.3.0/libraries/SPI</locationURI>
+		</link>
+		<link>
+			<name>libraries/Timer</name>
+			<type>2</type>
+			<location>D:/src/ArduinoLibs/Timer</location>
+		</link>
+		<link>
+			<name>libraries/UIPEthernet</name>
+			<type>2</type>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/libraries/UIPEthernet/2.0.4</locationURI>
 		</link>
 		<link>
 			<name>libraries/esp8266</name>

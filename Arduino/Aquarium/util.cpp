@@ -57,7 +57,7 @@ void aquariumTriggerLogics(float waterTemperature, Mode mode, float desiredTempe
 	if (mode == AUTO) {
 		if (waterTemperature > desiredTemperature + 0.25) {
 			gpio(AQ_HEATER1_PIN, LOW, AQ_HEATER1_CB_TOPIC, mqttClient);
-			if(waterTemperature > desiredTemperature + 0.5) {
+			if((waterTemperature > desiredTemperature + 0.5) && ) {
 				gpio(AQ_COOLER1_PIN, HIGH, AQ_COOLER1_CB_TOPIC, mqttClient);
 			}
 		} else if (waterTemperature < desiredTemperature) {
@@ -112,10 +112,11 @@ void pinCommandHandler(int pin, const char* callbackTopic, String payload,  Mode
 }
 
 void gpio(int pin, boolean state, const char* callbackTopic, PubSubClient *mqttClient) {
-	if (state == HIGH) {
+	boolean pinState = digitalRead(pin);
+	if (state == HIGH && !pinState) {
 		digitalWrite(pin, HIGH);
 		mqttClient->publish(callbackTopic,"ON");
-	} else {
+	} else if(state == LOW && pinState){
 		digitalWrite(pin, LOW);
 		mqttClient->publish(callbackTopic,"OFF");
 	}

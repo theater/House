@@ -21,6 +21,8 @@
 								<option id="io.sloeber.compiler.cpp.sketch.option.incpath.1975351952" name="Include Paths (-I)" superClass="io.sloeber.compiler.cpp.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathRoomMirrorHeatingCtrl/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathRoomMirrorHeatingCtrl/core/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathRoomMirrorHeatingCtrl/libraries/DHT}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathRoomMirrorHeatingCtrl/libraries/Timer}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.1106423765" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
@@ -28,6 +30,8 @@
 								<option id="io.sloeber.compiler.c.sketch.option.incpath.1667396975" name="Include Paths (-I)" superClass="io.sloeber.compiler.c.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathRoomMirrorHeatingCtrl/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathRoomMirrorHeatingCtrl/core/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathRoomMirrorHeatingCtrl/libraries/DHT}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathRoomMirrorHeatingCtrl/libraries/Timer}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.c.sketch.input.505989399" name="C Source Files" superClass="io.sloeber.compiler.c.sketch.input"/>
 							</tool>
@@ -35,6 +39,8 @@
 								<option id="io.sloeber.compiler.asm.sketch.option.incpath.1035445914" name="Include Paths (-I)" superClass="io.sloeber.compiler.asm.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathRoomMirrorHeatingCtrl/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathRoomMirrorHeatingCtrl/core/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathRoomMirrorHeatingCtrl/libraries/DHT}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathRoomMirrorHeatingCtrl/libraries/Timer}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.918244124" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>

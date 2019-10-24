@@ -52,6 +52,8 @@
 #define PIN_GPIO2_MUX PERIPHS_IO_MUX_GPIO2_U
 #define PIN_GPIO2_FUNC FUNC_GPIO2
 
+#define TEMPERATURE_CORRECTION -1
+
 // Output pin for the relay
 #define PIN_GPIO4 4
 #define PIN_GPIO4_MUX PERIPHS_IO_MUX_MTDI_U

@@ -77,6 +77,7 @@ int ICACHE_FLASH_ATTR ds18b20() {
 	whole = tReading >> 4;  // separate off the whole and fractional portions
 	fract = (tReading & 0xf) * 100 / 16;
 
+	whole = whole + TEMPERATURE_CORRECTION;
 	INFO("Temperature: %c%d.%d Celsius\r\n", signBit ? '-' : '+', whole, fract < 10 ? 0 : fract);
 	if (signBit) {
 		os_sprintf(sTemperature, "%c%d.%d", '-', whole, fract < 10 ? 0 : fract);

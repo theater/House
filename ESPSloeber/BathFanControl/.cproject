@@ -28,6 +28,15 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/esp8266/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/PubSubClient}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/PubSubClient/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/Adafruit_Sensor}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/DHT-sensor-library}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/Timer}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/Room}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/DallasTemperature}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/UIPEthernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/UIPEthernet/utility}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/OneWire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/EEPROM}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.1342254511" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
@@ -42,6 +51,15 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/esp8266/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/PubSubClient}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/PubSubClient/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/Adafruit_Sensor}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/DHT-sensor-library}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/Timer}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/Room}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/DallasTemperature}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/UIPEthernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/UIPEthernet/utility}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/OneWire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/EEPROM}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.c.sketch.input.1717522274" name="C Source Files" superClass="io.sloeber.compiler.c.sketch.input"/>
 							</tool>
@@ -56,6 +74,15 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/esp8266/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/PubSubClient}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/PubSubClient/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/Adafruit_Sensor}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/DHT-sensor-library}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/Timer}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/Room}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/DallasTemperature}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/UIPEthernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/UIPEthernet/utility}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/OneWire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BathFanControl/libraries/EEPROM}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.2082224129" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>
@@ -66,7 +93,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="libraries/UIPEthernet/mbed|libraries/UIPEthernet/hardware|libraries/?*/**/?xamples/**|libraries/?*/**/?xtras/**|libraries/?*/**/test*/**|libraries/?*/**/third-party/**|libraries/**/._*|libraries/?*/utility/*/*" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry excluding="libraries/Adafruit_Sensor/.git|libraries/DHT-sensor-library/.github|libraries/DHT-sensor-library/.git|libraries/UIPEthernet/mbed|libraries/UIPEthernet/hardware|libraries/?*/**/?xamples/**|libraries/?*/**/?xtras/**|libraries/?*/**/test*/**|libraries/?*/**/third-party/**|libraries/**/._*|libraries/?*/utility/*/*" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -81,4 +108,5 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>

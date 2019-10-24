@@ -47,6 +47,12 @@
 								<option id="io.sloeber.compiler.asm.sketch.option.incpath.866966287" name="Include Paths (-I)" superClass="io.sloeber.compiler.asm.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Aquarium/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Aquarium/core/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Aquarium/libraries/DallasTemperature}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Aquarium/libraries/OneWire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Aquarium/libraries/PubSubClient}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Aquarium/libraries/Timer}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Aquarium/libraries/UIPEthernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Aquarium/libraries/UIPEthernet/utility}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.497100999" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>
