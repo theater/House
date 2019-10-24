@@ -2,11 +2,20 @@
 
 #include "BathFanControl.h"
 
-#include <PubSubClient.h>
-#include <ESP8266WiFi.h>
 #include <DHT.h>
+#include <EEPROM.h>
+#include <ESP8266WebServer.h>
+#include <ESP8266WiFi.h>
+#include <HardwareSerial.h>
+#include <IPAddress.h>
+#include <PubSubClient.h>
+#include <stdlib_noniso.h>
 #include <Timer.h>
-#include <eeprom.h>
+#include <WiFiClient.h>
+#include <cstdint>
+#include <cstring>
+
+#include "HttpHandler.h"
 #include "Util.h"
 
 // Constants
@@ -52,6 +61,7 @@ uint32_t interruptTime = 0;
 WiFiClient wifiClient;
 PubSubClient mqttClient(configData.mqttServerAddress, 1883, mqttCallback, wifiClient);
 DHT sensor(DHT_PIN, DHT22);
+HttpHandler *httpHandler = new HttpHandler();
 
 // Timers
 Timer sensorsUpdateTrigger;
@@ -65,6 +75,8 @@ void loopUntilConnected() {
 	while (!wifiConnect(configData.ssid, configData.ssidPassword)) {
 		// Loop until connected
 	}
+	String ipAddress = WiFi.localIP().toString();
+	Serial.printf("IP received = %s", ipAddress.c_str());
 
 	while (!mqttClient.connected()) {
 		Serial.println("Connecting to MQTT...");
@@ -86,6 +98,11 @@ void subscribeToMqttTopics() {
 	mqttClient.subscribe(configData.desiredHumidityMqttTopic);
 }
 
+void httpServerInitialize() {
+	httpHandler->on("/", std::bind(&HttpHandler::handleRootRequest, httpHandler));
+	httpHandler->begin();
+}
+
 void setup() {
 	delay(1000);
 	Serial.begin(115200);
@@ -101,6 +118,8 @@ void setup() {
 	sensorsUpdateTrigger.every(configData.sensorsUpdateReocurrenceIntervalMillis, &timerUpdate);
 
 	timerUpdate();
+
+	httpServerInitialize();
 }
 
 void timerUpdate() {
@@ -190,7 +209,6 @@ void loadConfigEPROM() {
 	EEPROM.begin(512);
 	EEPROM.get(0, configData);
 	configData.print();
-
 }
 
 void writeConfigToEPROM() {
@@ -202,4 +220,5 @@ void writeConfigToEPROM() {
 void loop() {
 	sensorsUpdateTrigger.update();
 	mqttClient.loop();
+	httpHandler->handleClient();
 }
