@@ -33,4 +33,10 @@ bool wifiConnect(const char* ssid, const char* password) {
 	return true;
 }
 
+bool handleHtmlCheckBox(String value) {
+	return value.equals("on") ? true : false;
+}
 
+String booleanToCheckBoxResponse(bool value) {
+	return value ? "1" : "0";
+}

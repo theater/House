@@ -10,6 +10,7 @@
 
 
 bool wifiConnect(const char* ssid, const char* password);
-
+bool handleHtmlCheckBox(String value);
+String booleanToCheckBoxResponse(bool value);
 
 #endif /* UTIL_H_ */

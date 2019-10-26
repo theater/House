@@ -17,40 +17,17 @@
 
 #include "HttpHandler.h"
 #include "Util.h"
+#include "Configuration.h"
 
 // Constants
-const unsigned MQTT_TOPICS_LENGTH = 60;
 const int DHT_PIN = 4;
 const byte LOW_SPEED = 0;
 const byte HIGH_SPEED = 1;
 
 // Configuration
-class {
-	public:
-		bool isSimulated = false;
-		char ssid[15] = "KLP";
-		char ssidPassword[15] = "charly78";
-		IPAddress mqttServerAddress = IPAddress( {
-				192, 168, 254, 40 });
-		int mqttPort = 1883;
-		char mqttClientName[20] = "ESP_BATH_FLOOR1";
-		int mode = 2;
-		int desiredHumidity = 60;
-		int lowSpeedTreshold = 70;
-		int highSpeedTreshold = 80;
-		char fanSpeedMqttTopic[MQTT_TOPICS_LENGTH] = "home/floor1/bathroom/fan/speed";
-		char humidityMqttTopic[MQTT_TOPICS_LENGTH] = "home/floor1/bathroom/humidity/1";
-		char temperatureMqttTopic[MQTT_TOPICS_LENGTH] = "home/floor1/bathroom/temperature/1";
-		char modeMqttTopic[MQTT_TOPICS_LENGTH] = "home/floor1/bathroom/mode";
-		char desiredHumidityMqttTopic[MQTT_TOPICS_LENGTH] = "home/floor1/bathroom/humidity/desired";
-		unsigned sensorsUpdateReocurrenceIntervalMillis = 30000;
+Configuration configData;
 
-		void print() {
-			Serial.printf("Current mode set to %d \n", mode);
-		}
-} configData;
-
-const Pin FAN_SPEED_PIN = Pin(2, configData.fanSpeedMqttTopic);
+const Pin FAN_SPEED_PIN = Pin(2, configData.fanSpeedMqttTopic.c_str());
 
 // Variables
 float humiditySensorValue = 60;
@@ -61,7 +38,7 @@ uint32_t interruptTime = 0;
 WiFiClient wifiClient;
 PubSubClient mqttClient(configData.mqttServerAddress, 1883, mqttCallback, wifiClient);
 DHT sensor(DHT_PIN, DHT22);
-HttpHandler *httpHandler = new HttpHandler();
+HttpHandler *httpHandler = new HttpHandler(&configData);
 
 // Timers
 Timer sensorsUpdateTrigger;
@@ -72,7 +49,7 @@ void initializeGpioPinModes() {
 }
 
 void loopUntilConnected() {
-	while (!wifiConnect(configData.ssid, configData.ssidPassword)) {
+	while (!wifiConnect(configData.ssid.c_str(), configData.ssidPassword.c_str())) {
 		// Loop until connected
 	}
 	String ipAddress = WiFi.localIP().toString();
@@ -81,7 +58,7 @@ void loopUntilConnected() {
 	while (!mqttClient.connected()) {
 		Serial.println("Connecting to MQTT...");
 
-		if (mqttClient.connect(configData.mqttClientName, "user", "password")) {
+		if (mqttClient.connect(configData.mqttClientName.c_str(), "user", "password")) {
 			Serial.println("MQTT connected sucessfully");
 		} else {
 			Serial.print("failed with state ");
@@ -90,17 +67,12 @@ void loopUntilConnected() {
 		}
 	}
 
-	mqttClient.publish(configData.mqttClientName, "Hello from BATHROOM-FLOOR1");
+	mqttClient.publish(configData.mqttClientName.c_str(), "Hello from BATHROOM-FLOOR1");
 }
 
 void subscribeToMqttTopics() {
-	mqttClient.subscribe(configData.modeMqttTopic);
-	mqttClient.subscribe(configData.desiredHumidityMqttTopic);
-}
-
-void httpServerInitialize() {
-	httpHandler->on("/", std::bind(&HttpHandler::handleRootRequest, httpHandler));
-	httpHandler->begin();
+	mqttClient.subscribe(configData.modeMqttTopic.c_str());
+	mqttClient.subscribe(configData.desiredHumidityMqttTopic.c_str());
 }
 
 void setup() {
@@ -108,7 +80,7 @@ void setup() {
 	Serial.begin(115200);
 	loopUntilConnected();
 
-	loadConfigEPROM();
+//	loadConfigEPROM();
 
 	subscribeToMqttTopics();
 
@@ -119,7 +91,7 @@ void setup() {
 
 	timerUpdate();
 
-	httpServerInitialize();
+	httpHandler->init();
 }
 
 void timerUpdate() {
@@ -136,7 +108,7 @@ int retrieveHumidity() {
 	}
 	int result = (int) value;
 	Serial.printf("Humidity sensor value: %d \n", result);
-	publishValueMqtt(result, configData.humidityMqttTopic);
+	publishValueMqtt(result, configData.humidityMqttTopic.c_str());
 	return result;
 }
 
@@ -149,7 +121,7 @@ float retrieveTemperature() {
 
 	Serial.print("Temperature sensor value:");
 	Serial.println(value);
-	publishValueMqtt(value, configData.temperatureMqttTopic);
+	publishValueMqtt(value, configData.temperatureMqttTopic.c_str());
 	return value;
 }
 
@@ -192,7 +164,7 @@ void mqttCallback(const char* topic, const byte* payload, const unsigned int len
 	Serial.printf("Received message: topic=%s, payload=%s\n", topic, cPayload);
 
 	bool configUpdated = false;
-	if (strcmp(topic, configData.modeMqttTopic) == 0) {
+	if (strcmp(topic, configData.modeMqttTopic.c_str()) == 0) {
 		configUpdated = true;
 		configData.mode = atoi(cPayload);
 		Serial.printf("Configuration to be updated. Mode=%d\n",configData.mode);
