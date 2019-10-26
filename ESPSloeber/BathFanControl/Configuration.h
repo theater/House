@@ -10,6 +10,7 @@
 
 #include <HardwareSerial.h>
 #include <IPAddress.h>
+#include <EEPROM.h>
 
 class Configuration {
 	public:
@@ -40,7 +41,16 @@ class Configuration {
 		Configuration();
 		virtual ~Configuration();
 		void print();
-
+		/**
+		 * @param configProperty = the property to be updated
+		 * @param value = the value to which the property will be updated
+		 * @param parameterName = description of the property for logging
+		 */
+		void updateValue(String * configProperty, String value, String parameterName);
+		void updateValue(int * configProperty, String value, String parameterName);
+		void updateValue(bool * configProperty, String value, String parameterName);
+		void loadEprom();
+		void saveEprom();
 };
 
 #endif /* CONFIGURATION_H_ */

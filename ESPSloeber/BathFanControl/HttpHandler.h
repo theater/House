@@ -21,6 +21,7 @@ class HttpHandler {
 		Configuration *config;
 		int server;
 		String replaceHtmlValues(String html);
+		void transferArgumentsToConfig();
 
 	public:
 		HttpHandler(Configuration * config);

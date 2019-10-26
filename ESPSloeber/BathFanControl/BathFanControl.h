@@ -21,8 +21,6 @@ void updatePinState(Pin pin, const byte state);
 void mqttCallback(const char* topic, const byte* payload, const unsigned int length);
 void publishValueMqtt(double value, const char* topic);
 void timerUpdate();
-void writeConfigToEPROM();
-void loadConfigEPROM();
 
 enum MODE {OFF=0, ON=1, AUTO=2};
 

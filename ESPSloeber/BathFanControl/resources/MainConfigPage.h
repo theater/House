@@ -35,7 +35,10 @@ const char CONFIG_HTML[] PROGMEM = R"rawliteral(
     			Low Speed Humidity Treshold: <input type="text" name="lowSpeedTreshold" value="lowSpeedTresholdValue"><br>
     			High Speed Humidity Treshold: <input type="text" name="highSpeedTreshold" value="highSpeedTresholdValue"><br>
    			</fieldset>
-    		<input type="submit" value="Submit">
+    		<input type="submit" value="Save to EPROM">
+  		</form>
+  		<form action="/load" method=post>
+  		<input type="submit" value="Load from EPROM">
   		</form>
 	</body>
 </html>)rawliteral";

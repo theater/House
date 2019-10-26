@@ -3,7 +3,6 @@
 #include "BathFanControl.h"
 
 #include <DHT.h>
-#include <EEPROM.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <HardwareSerial.h>
@@ -80,16 +79,16 @@ void setup() {
 	Serial.begin(115200);
 	loopUntilConnected();
 
-//	loadConfigEPROM();
+//	configData.loadEprom();
 
-	subscribeToMqttTopics();
+//	subscribeToMqttTopics();
 
-	initializeGpioPinModes();
-	sensor.begin();
+//	initializeGpioPinModes();
+//	sensor.begin();
+//
+//	sensorsUpdateTrigger.every(configData.sensorsUpdateReocurrenceIntervalMillis, &timerUpdate);
 
-	sensorsUpdateTrigger.every(configData.sensorsUpdateReocurrenceIntervalMillis, &timerUpdate);
-
-	timerUpdate();
+//	timerUpdate();
 
 	httpHandler->init();
 }
@@ -172,21 +171,8 @@ void mqttCallback(const char* topic, const byte* payload, const unsigned int len
 
 	if (configUpdated) {
 		Serial.println("Writing config to EPROM");
-		writeConfigToEPROM();
+		configData.saveEprom();
 	}
-}
-
-void loadConfigEPROM() {
-	Serial.printf("Loading config from EPROM...");
-	EEPROM.begin(512);
-	EEPROM.get(0, configData);
-	configData.print();
-}
-
-void writeConfigToEPROM() {
-	EEPROM.begin(512);
-	EEPROM.put(0, configData);
-	EEPROM.commit();
 }
 
 void loop() {

@@ -25,19 +25,17 @@ void HttpHandler::handleRootRequest() {
 void HttpHandler::handleSubmitRequest() {
 	Serial.println("Received request to submit folder...");
 
-	String desiredHumidity = httpServer->arg("desiredHumidity");
-	Serial.printf("Desired humidity received: %s", desiredHumidity.c_str());
+	transferArgumentsToConfig();
+	config->saveEprom();
 
-	String response = "<html>Submit triggered. Received=";
-	response.concat(desiredHumidity.c_str());
-	response.concat("</html");
-	httpServer->send(200, "text/html", response);
+	httpServer->send(200, "text/plain", "Submit done");
 }
 
 void HttpHandler::init() {
 	Serial.println("Creating navigation bindings...");
 	on("/", std::bind(&HttpHandler::handleRootRequest, this));
 	on("/submit", std::bind(&HttpHandler::handleSubmitRequest, this));
+	on("/load", std::bind(&Configuration::loadEprom, config));
 	begin();
 }
 
@@ -71,4 +69,33 @@ String HttpHandler::replaceHtmlValues(String html) {
 	html.replace("lowSpeedTresholdValue", String(config->lowSpeedTreshold));
 	html.replace("highSpeedTresholdValue", String(config->highSpeedTreshold));
 	return html;
+}
+
+void HttpHandler::transferArgumentsToConfig() {
+	config->updateValue(&config->isSimulated, httpServer->arg("isSimulated"), "isSimulated");
+
+	////////////////////////////////////////////////////////////////
+	config->updateValue(&config->ssid, httpServer->arg("ssid"), "ssid");
+	config->updateValue(&config->ssidPassword, httpServer->arg("ssidPassword"), "ssidPassword");
+
+	////////////////////////////////////////////////////////////////
+	//TODO think about this later. Probably wont be too hard...
+//	String mqttServerAddress = httpServer->arg("mqttServerAddress");
+//	if (!mqttServerAddress.equals("")) {
+//		config->updateValue(&config->mqttServerAddress, mqttServerAddress, "mqttServerAddress");
+//	}
+	config->updateValue(&config->mqttPort, httpServer->arg("mqttPort"), "mqttPort");
+	config->updateValue(&config->mqttClientName, httpServer->arg("mqttClientName"), "mqttClientName");
+
+	////////////////////////////////////////////////////////////////
+	config->updateValue(&config->modeMqttTopic, httpServer->arg("modeMqttTopic"), "modeMqttTopic");
+	config->updateValue(&config->desiredHumidityMqttTopic, httpServer->arg("desiredHumidityMqttTopic"), "desiredHumidityMqttTopic");
+	config->updateValue(&config->temperatureMqttTopic, httpServer->arg("temperatureMqttTopic"), "temperatureMqttTopic");
+	config->updateValue(&config->humidityMqttTopic, httpServer->arg("humidityMqttTopic"), "humidityMqttTopic");
+	config->updateValue(&config->fanSpeedMqttTopic, httpServer->arg("fanSpeedMqttTopic"), "fanSpeedMqttTopic");
+
+	////////////////////////////////////////////////////////////////
+	config->updateValue(&config->desiredHumidity, httpServer->arg("desiredHumidity"), "desiredHumidity");
+	config->updateValue(&config->lowSpeedTreshold, httpServer->arg("lowSpeedTreshold"), "lowSpeedTreshold");
+	config->updateValue(&config->highSpeedTreshold, httpServer->arg("highSpeedTreshold"), "highSpeedTreshold");
 }
