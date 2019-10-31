@@ -42,7 +42,9 @@ const char CONFIG_HTML[] PROGMEM = R"rawliteral(
   		<input type="submit" value="Load from EPROM">
   		</form>
 	</body>
-</html>)rawliteral";
+</html>
+)rawliteral";
+
 const char LOAD_HTML[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
 	<body>

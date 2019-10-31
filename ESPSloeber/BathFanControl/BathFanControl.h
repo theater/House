@@ -9,6 +9,7 @@
 #include "Arduino.h"
 //add your includes for the project BathFanControl here
 #include "Pin.h"
+#include "Messages.h"
 
 //end of add your includes here
 
@@ -17,7 +18,7 @@
 int retrieveHumidity();
 float retrieveTemperature();
 void controlHumidity(int humidityValue);
-void updatePinState(Pin pin, const byte state);
+void updatePinState(Pin* pin, const byte state);
 void mqttCallback(const char* topic, const byte* payload, const unsigned int length);
 void publishValueMqtt(double value, const char* topic);
 void timerUpdate();
