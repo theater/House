@@ -18,7 +18,7 @@ const char CONFIG_HTML[] PROGMEM = R"rawliteral(
    			<fieldset>
     		<legend>MQTT Connection Information:</legend>
     			MQTT Server Address: <input type="text" name="mqttServerAddress" value="mqttServerAddressValue"><br>
-    			MQTT Server Port: <input type="text" name="mqttPort" value=1883 value="mqttPortValue"><br>
+    			MQTT Server Port: <input type="text" name="mqttPort" value="mqttPortValue"><br>
     			MQTT Client Name: <input type="text" name="mqttClientName" value="mqttClientNameValue"><br>
    			</fieldset>
    			<fieldset>
@@ -31,6 +31,7 @@ const char CONFIG_HTML[] PROGMEM = R"rawliteral(
    			</fieldset>
    			<fieldset>
     			<legend>Device Logic Settings:</legend>
+    			Mode: <input type="text" name="mode" value="modeValue"><br>
     			Desired humidity: <input type="text" name="desiredHumidity" value="desiredHumidityValue"><br>
     			Low Speed Humidity Treshold: <input type="text" name="lowSpeedTreshold" value="lowSpeedTresholdValue"><br>
     			High Speed Humidity Treshold: <input type="text" name="highSpeedTreshold" value="highSpeedTresholdValue"><br>
@@ -39,6 +40,24 @@ const char CONFIG_HTML[] PROGMEM = R"rawliteral(
   		</form>
   		<form action="/load" method=post>
   		<input type="submit" value="Load from EPROM">
+  		</form>
+	</body>
+</html>)rawliteral";
+const char LOAD_HTML[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML><html>
+	<body>
+		<form action="/" method=get>
+		Successfully loaded EPROM memory.
+  		<input type="submit" value="Goto initial page"><br>
+  		</form>
+	</body>
+</html>)rawliteral";
+const char SAVE_HTML[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML><html>
+	<body>
+		<form action="/" method=get>
+		Successfully saved to EPROM memory.<br>
+  		<input type="submit" value="Goto initial page">
   		</form>
 	</body>
 </html>)rawliteral";

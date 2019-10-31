@@ -28,14 +28,20 @@ void HttpHandler::handleSubmitRequest() {
 	transferArgumentsToConfig();
 	config->saveEprom();
 
-	httpServer->send(200, "text/plain", "Submit done");
+	httpServer->send(200, "text/html", SAVE_HTML);
+}
+
+void HttpHandler::handleLoadRequest() {
+	Serial.println("Received request to load EPROM...");
+	config->loadEprom();
+	httpServer->send(200, "text/html", LOAD_HTML);
 }
 
 void HttpHandler::init() {
 	Serial.println("Creating navigation bindings...");
 	on("/", std::bind(&HttpHandler::handleRootRequest, this));
 	on("/submit", std::bind(&HttpHandler::handleSubmitRequest, this));
-	on("/load", std::bind(&Configuration::loadEprom, config));
+	on("/load", std::bind(&HttpHandler::handleLoadRequest, this));
 	begin();
 }
 
@@ -65,9 +71,10 @@ String HttpHandler::replaceHtmlValues(String html) {
 	html.replace("humidityMqttTopicValue", config->humidityMqttTopic);
 	html.replace("fanSpeedMqttTopicValue", config->fanSpeedMqttTopic);
 
+	html.replace("modeValue", String(config->mode));
 	html.replace("desiredHumidityValue", String(config->desiredHumidity));
-	html.replace("lowSpeedTresholdValue", String(config->lowSpeedTreshold));
-	html.replace("highSpeedTresholdValue", String(config->highSpeedTreshold));
+	html.replace("lowSpeedTresholdValue", String(config->lowSpeedThreshold));
+	html.replace("highSpeedTresholdValue", String(config->highSpeedThreshold));
 	return html;
 }
 
@@ -80,10 +87,11 @@ void HttpHandler::transferArgumentsToConfig() {
 
 	////////////////////////////////////////////////////////////////
 	//TODO think about this later. Probably wont be too hard...
-//	String mqttServerAddress = httpServer->arg("mqttServerAddress");
-//	if (!mqttServerAddress.equals("")) {
-//		config->updateValue(&config->mqttServerAddress, mqttServerAddress, "mqttServerAddress");
-//	}
+	String mqttServerAddress = httpServer->arg("mqttServerAddress");
+	if (!mqttServerAddress.equals("")) {
+		config->mqttServerAddress.fromString(mqttServerAddress);
+		Serial.printf("Updating IP address to value: %s\n", config->mqttServerAddress.toString().c_str());
+	}
 	config->updateValue(&config->mqttPort, httpServer->arg("mqttPort"), "mqttPort");
 	config->updateValue(&config->mqttClientName, httpServer->arg("mqttClientName"), "mqttClientName");
 
@@ -95,7 +103,8 @@ void HttpHandler::transferArgumentsToConfig() {
 	config->updateValue(&config->fanSpeedMqttTopic, httpServer->arg("fanSpeedMqttTopic"), "fanSpeedMqttTopic");
 
 	////////////////////////////////////////////////////////////////
+	config->updateValue(&config->mode, httpServer->arg("mode"), "mode");
 	config->updateValue(&config->desiredHumidity, httpServer->arg("desiredHumidity"), "desiredHumidity");
-	config->updateValue(&config->lowSpeedTreshold, httpServer->arg("lowSpeedTreshold"), "lowSpeedTreshold");
-	config->updateValue(&config->highSpeedTreshold, httpServer->arg("highSpeedTreshold"), "highSpeedTreshold");
+	config->updateValue(&config->lowSpeedThreshold, httpServer->arg("lowSpeedTreshold"), "lowSpeedTreshold");
+	config->updateValue(&config->highSpeedThreshold, httpServer->arg("highSpeedTreshold"), "highSpeedTreshold");
 }

@@ -84,11 +84,11 @@ void setup() {
 //	subscribeToMqttTopics();
 
 //	initializeGpioPinModes();
-//	sensor.begin();
+	sensor.begin();
 //
-//	sensorsUpdateTrigger.every(configData.sensorsUpdateReocurrenceIntervalMillis, &timerUpdate);
+	sensorsUpdateTrigger.every(configData.sensorsUpdateReocurrenceIntervalMillis, &timerUpdate);
 
-//	timerUpdate();
+	timerUpdate();
 
 	httpHandler->init();
 }
@@ -133,7 +133,7 @@ void publishValueMqtt(double value, const char* topic) {
 void controlHumidity(int humidityValue) {
 	Serial.printf("Measured humidity value: %d \n", humidityValue);
 	if (humidityValue > configData.desiredHumidity) {
-		if (humidityValue > configData.highSpeedTreshold) {
+		if (humidityValue > configData.highSpeedThreshold) {
 			updatePinState(FAN_SPEED_PIN, HIGH_SPEED);
 		} else {
 			updatePinState(FAN_SPEED_PIN, LOW_SPEED);

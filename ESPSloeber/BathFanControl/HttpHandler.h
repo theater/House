@@ -3,7 +3,7 @@
  *
  *  Created on: Oct 24, 2019
  *      Author: theater
- *      Wrapper of ESP8266WebServer with additional functionality
+ *      Wrapper of ESP8266WebServer with additional functionality specific to my use-case
  */
 
 #ifndef HTTPHANDLER_H_
@@ -19,7 +19,6 @@ class HttpHandler {
 		typedef std::function<void(void)> THandlerFunction;
 		ESP8266WebServer *httpServer;
 		Configuration *config;
-		int server;
 		String replaceHtmlValues(String html);
 		void transferArgumentsToConfig();
 
@@ -28,6 +27,7 @@ class HttpHandler {
 		virtual ~HttpHandler();
 		void handleRootRequest();
 		void handleSubmitRequest();
+		void handleLoadRequest();
   	    void on(const char* uri, THandlerFunction handler);
   	    void begin();
   	    void init();
