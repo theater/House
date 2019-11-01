@@ -22,25 +22,28 @@ void HttpHandler::handleRootRequest() {
 	httpServer->send(200, "text/html", replacedValues);
 }
 
-void HttpHandler::handleSubmitRequest() {
+void HttpHandler::handleSaveRequest() {
 	Serial.println("Received request to submit folder...");
 
 	transferArgumentsToConfig();
 	config->saveEprom();
 
-	httpServer->send(200, "text/html", SAVE_HTML);
+	String replacedValues = replaceHtmlValues(CONFIG_HTML, "Successfully saved config toEPROM.");
+	httpServer->send(200, "text/html", replacedValues);
 }
 
 void HttpHandler::handleLoadRequest() {
 	Serial.println("Received request to load EPROM...");
 	config->loadEprom();
-	httpServer->send(200, "text/html", LOAD_HTML);
+
+	String replacedValues = replaceHtmlValues(CONFIG_HTML, "Successfully loaded config from EPROM.");
+	httpServer->send(200, "text/html", replacedValues);
 }
 
 void HttpHandler::init() {
 	Serial.println("Creating navigation bindings...");
 	on("/", std::bind(&HttpHandler::handleRootRequest, this));
-	on("/submit", std::bind(&HttpHandler::handleSubmitRequest, this));
+	on("/submit", std::bind(&HttpHandler::handleSaveRequest, this));
 	on("/load", std::bind(&HttpHandler::handleLoadRequest, this));
 	begin();
 }
@@ -59,6 +62,9 @@ void HttpHandler::handleClient() {
 }
 
 String HttpHandler::replaceHtmlValues(String html) {
+	return replaceHtmlValues(html, "");
+}
+String HttpHandler::replaceHtmlValues(String html, String status) {
 	html.replace("ssidValue", config->ssid);
 
 	html.replace("mqttServerAddressValue", config->mqttServerAddress.toString());
@@ -76,6 +82,8 @@ String HttpHandler::replaceHtmlValues(String html) {
 	html.replace("desiredHumidityValue", String(config->desiredHumidity));
 	html.replace("lowSpeedTresholdValue", String(config->lowSpeedThreshold));
 	html.replace("highSpeedTresholdValue", String(config->highSpeedThreshold));
+	html.replace("StatusValue", status);
+
 	return html;
 }
 

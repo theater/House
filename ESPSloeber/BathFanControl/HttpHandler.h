@@ -20,6 +20,7 @@ class HttpHandler {
 		ESP8266WebServer *httpServer;
 		Configuration *config;
 		String replaceHtmlValues(String html);
+		String replaceHtmlValues(String html, String status);
 		void transferArgumentsToConfig();
 		String logMessages;
 
@@ -27,7 +28,7 @@ class HttpHandler {
 		HttpHandler(Configuration * config);
 		virtual ~HttpHandler();
 		void handleRootRequest();
-		void handleSubmitRequest();
+		void handleSaveRequest();
 		void handleLoadRequest();
   	    void on(const char* uri, THandlerFunction handler);
   	    void begin();
