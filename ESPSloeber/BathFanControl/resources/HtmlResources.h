@@ -28,6 +28,7 @@ const char CONFIG_HTML[] PROGMEM = R"rawliteral(
     			Current Temperature Topic: <input type="text" name="temperatureMqttTopic" value="temperatureMqttTopicValue"><br>
     			Current Humidity Topic: <input type="text" name="humidityMqttTopic" value="humidityMqttTopicValue"><br>
     			Current Fan Speed Topic: <input type="text" name="fanSpeedMqttTopic" value="fanSpeedMqttTopicValue"><br>
+    			Mirror Heating Topic: <input type="text" name="mirrorHeatingMqttTopic" value="mirrorHeatingMqttTopicValue"><br>
    			</fieldset>
    			<fieldset>
     			<legend>Device Logic Settings:</legend>
@@ -40,6 +41,9 @@ const char CONFIG_HTML[] PROGMEM = R"rawliteral(
   		</form>
   		<form action="/load" method=post>
   		<input type="submit" value="Load from EPROM">
+  		</form>
+  		<form action="/control" method=post>
+  		<input type="submit" value="Manual Control">
   		</form>
 	</body>
 </html>

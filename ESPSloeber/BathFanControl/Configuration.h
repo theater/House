@@ -26,6 +26,7 @@ class Configuration {
 		String mqttClientName = "ESP_TMP";
 
 		String fanSpeedMqttTopic = "home/floor1/bathroom/fan/speed";
+		String mirrorHeatingMqttTopic = "home/floor1/bathroom/mirror/1";
 		String humidityMqttTopic = "home/floor1/bathroom/humidity/1";
 		String temperatureMqttTopic = "home/floor1/bathroom/temperature/1";
 		String modeMqttTopic = "home/floor1/bathroom/mode";

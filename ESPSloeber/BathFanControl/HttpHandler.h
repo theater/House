@@ -10,8 +10,8 @@
 #define HTTPHANDLER_H_
 #include <ESP8266WebServer.h>
 #include <functional>
-#include "resources/MainConfigPage.h"
 #include "Configuration.h"
+#include "resources/HtmlResources.h"
 #include "Util.h"
 
 class HttpHandler {

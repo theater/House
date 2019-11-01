@@ -35,6 +35,7 @@ uint32_t interruptTime = 0;
 
 // Objects
 Pin *fanSpeedPin;
+Pin *mirrorHeatingPin;
 WiFiClient wifiClient;
 PubSubClient *mqttClient;
 DHT sensor(DHT_PIN, DHT22);
@@ -46,6 +47,10 @@ Timer sensorsUpdateTrigger;
 void initializeGpioPinModes() {
 	fanSpeedPin = new Pin(2, configData.fanSpeedMqttTopic.c_str());
 	pinMode(fanSpeedPin->getPin(), OUTPUT);
+
+	mirrorHeatingPin = new Pin(0, configData.mirrorHeatingMqttTopic.c_str());
+	pinMode(mirrorHeatingPin->getPin(), OUTPUT);
+
 	pinMode(DHT_PIN, INPUT_PULLUP);
 }
 
@@ -145,25 +150,35 @@ void publishValueMqtt(double value, const char* topic) {
 
 void controlHumidity(int humidityValue) {
 	Serial.printf("Measured humidity value: %d \n", humidityValue);
-	if (humidityValue > configData.desiredHumidity) {
-		if (humidityValue > configData.highSpeedThreshold) {
-			updatePinState(fanSpeedPin, HIGH_SPEED);
+
+	// MODE = OFF
+	if (configData.mode == 0) {
+		updatePinState(fanSpeedPin, LOW_SPEED);
+		updatePinState(mirrorHeatingPin, OFF);
+	}
+	//MODE = AUTO
+	if (configData.mode == 2) {
+		if ( humidityValue > configData.desiredHumidity) {
+			if (humidityValue > configData.highSpeedThreshold) {
+				updatePinState(fanSpeedPin, HIGH_SPEED);
+			} else {
+				updatePinState(fanSpeedPin, LOW_SPEED);
+			}
+			updatePinState(mirrorHeatingPin, ON);
 		} else {
 			updatePinState(fanSpeedPin, LOW_SPEED);
+			updatePinState(mirrorHeatingPin, OFF);
 		}
-	} else {
-		updatePinState(fanSpeedPin, LOW_SPEED);
+		Serial.printf("Fan speed pin state = %s\n", digitalRead(fanSpeedPin->getPin()) ? "HIGH" : "LOW");
+		Serial.printf("Mirror heating pin state = %s", digitalRead(fanSpeedPin->getPin()) ? "HIGH" : "LOW");
 	}
-	Serial.printf("Fan speed pin state = %d\n", digitalRead(fanSpeedPin->getPin()));
 }
 
 void updatePinState(Pin *pin, const byte state) {
 	digitalWrite(pin->getPin(), state);
-	Serial.print("Updated pin ");
-	Serial.print(pin->getPin());
-	Serial.print(" to ");
-	Serial.println(state);
-	mqttClient->publish(pin->getTopic(), state ? "ON" : "OFF");
+	String stateStr = state ? "ON" : "OFF";
+	Serial.printf("Updated pin %d to state %s.", pin->getPin(), stateStr.c_str());
+	mqttClient->publish(pin->getTopic(), stateStr.c_str());
 }
 
 void mqttCallback(const char* topic, const byte* payload, const unsigned int length) {
@@ -175,7 +190,7 @@ void mqttCallback(const char* topic, const byte* payload, const unsigned int len
 	cPayload[length] = '\0';
 	Serial.printf("Received message: topic=%s, payload=%s\n", topic, cPayload);
 
-	if (strcmp(topic, configData.modeMqttTopic.c_str()) == 0) {
+	if (configData.modeMqttTopic.equals(topic)) {
 		configData.mode = atoi(cPayload);
 		Serial.printf("Configuration to be updated. Mode=%d\n",configData.mode);
 	}

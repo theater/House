@@ -18,6 +18,7 @@ void Configuration::print() {
 	Serial.printf("MQTT Server/port=%s:%d \n", mqttServerAddress.toString().c_str(), mqttPort);
 	Serial.printf("MQTT Client name=%s \n", mqttClientName.c_str());
 	Serial.printf("Fan speed topic=%s \n", fanSpeedMqttTopic.c_str());
+	Serial.printf("Mirror heating topic=%s \n", mirrorHeatingMqttTopic.c_str());
 	Serial.printf("Humidity topic=%s \n", humidityMqttTopic.c_str());
 	Serial.printf("Temperature topic=%s \n", temperatureMqttTopic.c_str());
 	Serial.printf("Mode topic=%s \n", modeMqttTopic.c_str());
@@ -68,6 +69,7 @@ void Configuration::loadEprom() {
 	mqttServerAddress.fromString(getStringEprom(&nextAddress));
 	mqttClientName = getStringEprom(&nextAddress);
 	fanSpeedMqttTopic  = getStringEprom(&nextAddress);
+	mirrorHeatingMqttTopic  = getStringEprom(&nextAddress);
 	humidityMqttTopic =  getStringEprom(&nextAddress);
 	temperatureMqttTopic =  getStringEprom(&nextAddress);
 	modeMqttTopic =  getStringEprom(&nextAddress);
@@ -97,6 +99,7 @@ void Configuration::saveEprom() {
 	putStringEprom(&nextAddress, mqttServerAddress.toString());
 	putStringEprom(&nextAddress, mqttClientName);
 	putStringEprom(&nextAddress, fanSpeedMqttTopic);
+	putStringEprom(&nextAddress, mirrorHeatingMqttTopic);
 	putStringEprom(&nextAddress, humidityMqttTopic);
 	putStringEprom(&nextAddress, temperatureMqttTopic);
 	putStringEprom(&nextAddress, modeMqttTopic);

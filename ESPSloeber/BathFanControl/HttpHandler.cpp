@@ -70,6 +70,7 @@ String HttpHandler::replaceHtmlValues(String html) {
 	html.replace("temperatureMqttTopicValue", config->temperatureMqttTopic);
 	html.replace("humidityMqttTopicValue", config->humidityMqttTopic);
 	html.replace("fanSpeedMqttTopicValue", config->fanSpeedMqttTopic);
+	html.replace("mirrorHeatingMqttTopicValue", config->mirrorHeatingMqttTopic);
 
 	html.replace("modeValue", String(config->mode));
 	html.replace("desiredHumidityValue", String(config->desiredHumidity));
