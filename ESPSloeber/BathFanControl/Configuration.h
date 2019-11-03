@@ -15,6 +15,7 @@
 class Configuration {
 	public:
 		static const unsigned MQTT_TOPICS_LENGTH = 60;
+		int configurationHash = 456;
 
 		bool isSimulated = true;
 

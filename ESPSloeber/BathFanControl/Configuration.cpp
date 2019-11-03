@@ -11,6 +11,7 @@ void Configuration::print() {
 	Serial.println("###########################################");
 	String simulated = isSimulated ? "true" : "false";
 	Serial.printf("Simulated=%s \n", simulated.c_str());
+	Serial.printf("configurationHash=%d \n", configurationHash);
 	Serial.println("###########################################");
 	Serial.printf("SSID=%s \n", ssid.c_str());
 	Serial.printf("SSID Password=%s \n", ssidPassword.c_str());
@@ -30,8 +31,6 @@ void Configuration::print() {
 	Serial.printf("High speed humidity threshold=%d%% \n", highSpeedThreshold);
 	Serial.printf("Sensors refresh interval=%dms \n", sensorsUpdateReocurrenceIntervalMillis);
 }
-
-
 
 void Configuration::updateValue(String * configProperty, String value, String parameterName) {
 	if (!value.equals("") && !value.equals("********")) {
@@ -64,36 +63,44 @@ void Configuration::loadEprom() {
 	int nextAddress = 10;
 	Serial.printf("Loading config from EPROM...\nStarting with address=%d.\n", nextAddress);
 	EEPROM.begin(512);
-	ssid = getStringEprom(&nextAddress);
-	ssidPassword = getStringEprom(&nextAddress);
-	mqttServerAddress.fromString(getStringEprom(&nextAddress));
-	mqttClientName = getStringEprom(&nextAddress);
-	fanSpeedMqttTopic  = getStringEprom(&nextAddress);
-	mirrorHeatingMqttTopic  = getStringEprom(&nextAddress);
-	humidityMqttTopic =  getStringEprom(&nextAddress);
-	temperatureMqttTopic =  getStringEprom(&nextAddress);
-	modeMqttTopic =  getStringEprom(&nextAddress);
-	desiredHumidityMqttTopic =  getStringEprom(&nextAddress);
-	Serial.printf("Finished loading strings. Last address=%d\n", nextAddress);
+	int hash = EEPROM.get(nextAddress += sizeof(configurationHash), configurationHash);
+	if (hash == configurationHash) {
+		ssid = getStringEprom(&nextAddress);
+		ssidPassword = getStringEprom(&nextAddress);
+		mqttServerAddress.fromString(getStringEprom(&nextAddress));
+		mqttClientName = getStringEprom(&nextAddress);
+		fanSpeedMqttTopic = getStringEprom(&nextAddress);
+		mirrorHeatingMqttTopic = getStringEprom(&nextAddress);
+		humidityMqttTopic = getStringEprom(&nextAddress);
+		temperatureMqttTopic = getStringEprom(&nextAddress);
+		modeMqttTopic = getStringEprom(&nextAddress);
+		desiredHumidityMqttTopic = getStringEprom(&nextAddress);
+		Serial.printf("Finished loading strings. Last address=%d\n", nextAddress);
 
-	isSimulated = EEPROM.get(nextAddress+=sizeof(isSimulated), isSimulated);
-	mode = EEPROM.get(nextAddress+=sizeof(mode), mode);
-	mqttPort = EEPROM.get(nextAddress+=sizeof(mqttPort), mqttPort);
-	desiredHumidity = EEPROM.get(nextAddress+=sizeof(desiredHumidity), desiredHumidity);
-	lowSpeedThreshold = EEPROM.get(nextAddress+=sizeof(lowSpeedThreshold), lowSpeedThreshold);
-	highSpeedThreshold = EEPROM.get(nextAddress+=sizeof(highSpeedThreshold), highSpeedThreshold);
-	sensorsUpdateReocurrenceIntervalMillis = EEPROM.get(nextAddress+=sizeof(sensorsUpdateReocurrenceIntervalMillis), sensorsUpdateReocurrenceIntervalMillis);
-	Serial.printf("Finished loading primitives. Last address=%d\n", nextAddress);
-
-	Serial.printf("Finished loading static arrays. Last address=%d\n", nextAddress);
+		isSimulated = EEPROM.get(nextAddress += sizeof(isSimulated), isSimulated);
+		mode = EEPROM.get(nextAddress += sizeof(mode), mode);
+		mqttPort = EEPROM.get(nextAddress += sizeof(mqttPort), mqttPort);
+		desiredHumidity = EEPROM.get(nextAddress += sizeof(desiredHumidity), desiredHumidity);
+		lowSpeedThreshold = EEPROM.get(nextAddress += sizeof(lowSpeedThreshold), lowSpeedThreshold);
+		highSpeedThreshold = EEPROM.get(nextAddress += sizeof(highSpeedThreshold), highSpeedThreshold);
+		sensorsUpdateReocurrenceIntervalMillis = EEPROM.get(nextAddress += sizeof(sensorsUpdateReocurrenceIntervalMillis),
+				sensorsUpdateReocurrenceIntervalMillis);
+		Serial.printf("Finished loading primitives. Last address=%d\n", nextAddress);
+	} else {
+		Serial.printf("Configuration hash from EPROM not equal to expected. Default values will be used. Value expected=%d, Value in EPROM=%d", this->configurationHash, configurationHash);
+	}
 
 	print();
 }
 
 void Configuration::saveEprom() {
 	int nextAddress = 10;
+
 	Serial.printf("Saving config from EPROM...\nStarting with address=%d.\n", nextAddress);
 	EEPROM.begin(512);
+
+	EEPROM.put(nextAddress += sizeof(configurationHash), configurationHash);
+
 	putStringEprom(&nextAddress, ssid);
 	putStringEprom(&nextAddress, ssidPassword);
 	putStringEprom(&nextAddress, mqttServerAddress.toString());
@@ -106,13 +113,13 @@ void Configuration::saveEprom() {
 	putStringEprom(&nextAddress, desiredHumidityMqttTopic);
 	Serial.printf("Finished saving strings. Last address=%d\n", nextAddress);
 
-	EEPROM.put(nextAddress+=sizeof(isSimulated), isSimulated);
-	EEPROM.put(nextAddress+=sizeof(mode), mode);
-	EEPROM.put(nextAddress+=sizeof(mqttPort), mqttPort);
-	EEPROM.put(nextAddress+=sizeof(desiredHumidity), desiredHumidity);
-	EEPROM.put(nextAddress+=sizeof(lowSpeedThreshold), lowSpeedThreshold);
-	EEPROM.put(nextAddress+=sizeof(highSpeedThreshold), highSpeedThreshold);
-	EEPROM.put(nextAddress+=sizeof(sensorsUpdateReocurrenceIntervalMillis), sensorsUpdateReocurrenceIntervalMillis);
+	EEPROM.put(nextAddress += sizeof(isSimulated), isSimulated);
+	EEPROM.put(nextAddress += sizeof(mode), mode);
+	EEPROM.put(nextAddress += sizeof(mqttPort), mqttPort);
+	EEPROM.put(nextAddress += sizeof(desiredHumidity), desiredHumidity);
+	EEPROM.put(nextAddress += sizeof(lowSpeedThreshold), lowSpeedThreshold);
+	EEPROM.put(nextAddress += sizeof(highSpeedThreshold), highSpeedThreshold);
+	EEPROM.put(nextAddress += sizeof(sensorsUpdateReocurrenceIntervalMillis), sensorsUpdateReocurrenceIntervalMillis);
 	Serial.printf("Finished saving primitives. Last address=%d\n", nextAddress);
 	EEPROM.commit();
 	Serial.printf("EPROM used=%d bytes\n", nextAddress);
@@ -151,3 +158,4 @@ String Configuration::getStringEprom(int *address) {
 
 	return String(tempArr);
 }
+

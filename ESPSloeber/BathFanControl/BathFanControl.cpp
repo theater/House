@@ -19,7 +19,9 @@
 #include "Configuration.h"
 
 // Constants
-const int DHT_PIN = 4;
+const int DHT_PIN = 2;
+const int FAN_SPEED_PIN = 12;
+const int MIRROR_HEATER_PIN = 13;
 const byte LOW_SPEED = 0;
 const byte HIGH_SPEED = 1;
 
@@ -45,10 +47,10 @@ HttpHandler *httpHandler;
 Timer sensorsUpdateTrigger;
 
 void initializeGpioPinModes() {
-	fanSpeedPin = new Pin(2, configData.fanSpeedMqttTopic.c_str());
+	fanSpeedPin = new Pin(FAN_SPEED_PIN, configData.fanSpeedMqttTopic.c_str());
 	pinMode(fanSpeedPin->getPin(), OUTPUT);
 
-	mirrorHeatingPin = new Pin(0, configData.mirrorHeatingMqttTopic.c_str());
+	mirrorHeatingPin = new Pin(MIRROR_HEATER_PIN, configData.mirrorHeatingMqttTopic.c_str());
 	pinMode(mirrorHeatingPin->getPin(), OUTPUT);
 
 	pinMode(DHT_PIN, INPUT_PULLUP);
