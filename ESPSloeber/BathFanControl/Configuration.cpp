@@ -30,6 +30,8 @@ void Configuration::print() {
 	Serial.printf("Low speed humidity threshold=%d%% \n", lowSpeedThreshold);
 	Serial.printf("High speed humidity threshold=%d%% \n", highSpeedThreshold);
 	Serial.printf("Sensors refresh interval=%dms \n", sensorsUpdateReocurrenceIntervalMillis);
+	Serial.printf("Temperature correction=%d \n", temperatureCorrection);
+	Serial.printf("Humidity Correction=%d \n", humidityCorrection);
 }
 
 void Configuration::updateValue(String * configProperty, String value, String parameterName) {
@@ -60,11 +62,14 @@ void Configuration::updateValue(bool * configProperty, String value, String para
 }
 
 void Configuration::loadEprom() {
-	int nextAddress = 10;
-	Serial.printf("Loading config from EPROM...\nStarting with address=%d.\n", nextAddress);
+	int nextAddress = STARTING_ADDRESS;
+	Serial.printf("Loading config from EPROM...\nStarting with address=%d. Hash before load=%d\n", nextAddress, configurationHash);
 	EEPROM.begin(512);
-	int hash = EEPROM.get(nextAddress += sizeof(configurationHash), configurationHash);
+	int hash;
+	hash = EEPROM.get(nextAddress, hash);
+	Serial.printf("Loaded hash from EPROM=%d\n", hash);
 	if (hash == configurationHash) {
+		nextAddress+=sizeof(hash);
 		ssid = getStringEprom(&nextAddress);
 		ssidPassword = getStringEprom(&nextAddress);
 		mqttServerAddress.fromString(getStringEprom(&nextAddress));
@@ -85,21 +90,25 @@ void Configuration::loadEprom() {
 		highSpeedThreshold = EEPROM.get(nextAddress += sizeof(highSpeedThreshold), highSpeedThreshold);
 		sensorsUpdateReocurrenceIntervalMillis = EEPROM.get(nextAddress += sizeof(sensorsUpdateReocurrenceIntervalMillis),
 				sensorsUpdateReocurrenceIntervalMillis);
+		temperatureCorrection = EEPROM.get(nextAddress += sizeof(temperatureCorrection), temperatureCorrection);
+		humidityCorrection = EEPROM.get(nextAddress += sizeof(humidityCorrection), humidityCorrection);
 		Serial.printf("Finished loading primitives. Last address=%d\n", nextAddress);
 	} else {
-		Serial.printf("Configuration hash from EPROM not equal to expected. Default values will be used. Value expected=%d, Value in EPROM=%d", this->configurationHash, configurationHash);
+		Serial.printf("Configuration hash from EPROM not equal to expected. Default values will be used. Value expected=%d, Value in EPROM=%d\n", this->configurationHash, hash);
 	}
 
 	print();
 }
 
 void Configuration::saveEprom() {
-	int nextAddress = 10;
+	int nextAddress = STARTING_ADDRESS;
 
 	Serial.printf("Saving config from EPROM...\nStarting with address=%d.\n", nextAddress);
 	EEPROM.begin(512);
 
-	EEPROM.put(nextAddress += sizeof(configurationHash), configurationHash);
+	Serial.printf("Before writing configuration hash. Address=%d, hash=%d",nextAddress, configurationHash);
+	EEPROM.put(nextAddress, configurationHash);
+	nextAddress+=sizeof(configurationHash);
 
 	putStringEprom(&nextAddress, ssid);
 	putStringEprom(&nextAddress, ssidPassword);
@@ -120,6 +129,8 @@ void Configuration::saveEprom() {
 	EEPROM.put(nextAddress += sizeof(lowSpeedThreshold), lowSpeedThreshold);
 	EEPROM.put(nextAddress += sizeof(highSpeedThreshold), highSpeedThreshold);
 	EEPROM.put(nextAddress += sizeof(sensorsUpdateReocurrenceIntervalMillis), sensorsUpdateReocurrenceIntervalMillis);
+	EEPROM.put(nextAddress += sizeof(temperatureCorrection), temperatureCorrection);
+	EEPROM.put(nextAddress += sizeof(humidityCorrection), humidityCorrection);
 	Serial.printf("Finished saving primitives. Last address=%d\n", nextAddress);
 	EEPROM.commit();
 	Serial.printf("EPROM used=%d bytes\n", nextAddress);
@@ -127,12 +138,11 @@ void Configuration::saveEprom() {
 
 void Configuration::putStringEprom(int *address, String property) {
 	int length = property.length();
-	Serial.printf("Property %s length=%d, property in loop=", property.c_str(), length);
+	Serial.printf("Property %s / length=%d\n", property.c_str(), length);
 	EEPROM.put(*address, length);
 
 	*address += sizeof(length);
 	for (int i = 0; i < length; i++) {
-		Serial.print(property[i]);
 		EEPROM.write(*address + i, property[i]);
 	}
 	EEPROM.write(*address + length, '\0');

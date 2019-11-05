@@ -123,10 +123,14 @@ int retrieveHumidity() {
 	float value = configData.isSimulated ? random(40, 100) : sensor.readHumidity();
 	if (isnan(value)) {
 		Serial.println(PROBLEM_READING_SENSOR_VALUE);
-		return -999;
+		return 0;
 	}
 	int result = (int) value;
 	Serial.printf("Humidity sensor value: %d \n", result);
+
+	result+=configData.humidityCorrection;
+	Serial.printf("Humidity sensor corrected value: %d \n", result);
+
 	publishValueMqtt(result, configData.humidityMqttTopic.c_str());
 	return result;
 }
@@ -135,11 +139,17 @@ float retrieveTemperature() {
 	float value = configData.isSimulated ? random(15, 30) : sensor.readTemperature();
 	if (isnan(value)) {
 		Serial.println(PROBLEM_READING_SENSOR_VALUE);
-		return -999;
+		return 0;
 	}
-
-	Serial.print("Temperature sensor value:");
+	//Do not change this with printf as %.1f does not work for some reason
+	Serial.print("Temperature sensor value=");
 	Serial.println(value);
+
+	value+=configData.temperatureCorrection;
+	//Do not change this with printf as %.1f does not work for some reason
+	Serial.print("Temperature sensor corrected value=");
+	Serial.println(value);
+
 	publishValueMqtt(value, configData.temperatureMqttTopic.c_str());
 	return value;
 }
@@ -172,14 +182,14 @@ void controlHumidity(int humidityValue) {
 			updatePinState(mirrorHeatingPin, OFF);
 		}
 		Serial.printf("Fan speed pin state = %s\n", digitalRead(fanSpeedPin->getPin()) ? "HIGH" : "LOW");
-		Serial.printf("Mirror heating pin state = %s", digitalRead(fanSpeedPin->getPin()) ? "HIGH" : "LOW");
+		Serial.printf("Mirror heating pin state = %s\n", digitalRead(mirrorHeatingPin->getPin()) ? "ON" : "OFF");
 	}
 }
 
 void updatePinState(Pin *pin, const byte state) {
 	digitalWrite(pin->getPin(), state);
 	String stateStr = state ? "ON" : "OFF";
-	Serial.printf("Updated pin %d to state %s.", pin->getPin(), stateStr.c_str());
+	Serial.printf("Updated pin %d to state %s.\n", pin->getPin(), stateStr.c_str());
 	mqttClient->publish(pin->getTopic(), stateStr.c_str());
 }
 

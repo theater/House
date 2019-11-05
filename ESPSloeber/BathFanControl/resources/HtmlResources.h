@@ -36,6 +36,8 @@ const char CONFIG_HTML[] PROGMEM = R"rawliteral(
     			Desired humidity: <input type="text" name="desiredHumidity" value="desiredHumidityValue"><br>
     			Low Speed Humidity Treshold: <input type="text" name="lowSpeedTreshold" value="lowSpeedTresholdValue"><br>
     			High Speed Humidity Treshold: <input type="text" name="highSpeedTreshold" value="highSpeedTresholdValue"><br>
+    			Temperature Correction: <input type="text" name="temperatureCorrection" value="temperatureCorrectionValue"><br>
+    			Humidity Correction: <input type="text" name="humidityCorrection" value="humidityCorrectionValue"><br>
    			</fieldset>
 			<fieldset>
 				Status: StatusValue
@@ -45,9 +47,32 @@ const char CONFIG_HTML[] PROGMEM = R"rawliteral(
   		<form action="/load" method=post>
   		<input type="submit" value="Load from EPROM">
   		</form>
-  		<form action="/control" method=post>
+  		<form action="/manual" method=post>
   		<input type="submit" value="Manual Control">
   		</form>
+	</body>
+</html>
+)rawliteral";
+
+const char MANUAL_HTML[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML><html>
+	<head>
+		<h1>ESP8266 Configuration page</h1>
+		<title>ESP8266 Configuration page</title>
+  		<meta name="viewport" content="width=device-width, initial-scale=1">
+ 	</head>
+  
+	<body>
+		<form action="/manual" method=post>
+    		<legend>MQTT Connection Information:</legend>
+   			<fieldset>
+				<input type="submit" name="HeaterON" value="HeaterON">	<input type="submit" name="HeaterOFF" value="HeaterOFF"> <br>
+				<input type="submit" name="FanSpeedHIGH" value="FanSpeedHIGH">	<input type="submit" name="FanSpeedLOW" value="FanSpeedLOW"><br>
+   			</fieldset>
+  		</form>
+		<form action="/" method=get>
+			<input type="submit" value="Back to main" >
+		</form>
 	</body>
 </html>
 )rawliteral";

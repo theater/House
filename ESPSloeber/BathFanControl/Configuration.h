@@ -13,9 +13,11 @@
 #include <EEPROM.h>
 
 class Configuration {
-	public:
+	private:
+		static const unsigned STARTING_ADDRESS = 10;
 		static const unsigned MQTT_TOPICS_LENGTH = 60;
-		int configurationHash = 456;
+	public:
+		int configurationHash = 460;
 
 		bool isSimulated = true;
 
@@ -37,6 +39,9 @@ class Configuration {
 		int desiredHumidity = 60;
 		int lowSpeedThreshold = 70;
 		int highSpeedThreshold = 80;
+
+		int temperatureCorrection = 0;
+		int humidityCorrection = 0;
 
 		unsigned sensorsUpdateReocurrenceIntervalMillis = 30000;
 

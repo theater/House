@@ -30,6 +30,7 @@ class HttpHandler {
 		void handleRootRequest();
 		void handleSaveRequest();
 		void handleLoadRequest();
+		void handleManualModeRequest();
   	    void on(const char* uri, THandlerFunction handler);
   	    void begin();
   	    void init();
