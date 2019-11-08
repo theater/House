@@ -205,6 +205,9 @@ void mqttCallback(const char* topic, const byte* payload, const unsigned int len
 	if (configData.modeMqttTopic.equals(topic)) {
 		configData.mode = atoi(cPayload);
 		Serial.printf("Configuration to be updated. Mode=%d\n",configData.mode);
+	} else if (configData.desiredHumidityMqttTopic.equals(topic)) {
+		configData.desiredHumidity = atoi(cPayload);
+		Serial.printf("Configuration to be updated. Mode=%d\n",configData.desiredHumidity);
 	}
 }
 

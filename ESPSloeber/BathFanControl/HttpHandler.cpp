@@ -126,6 +126,7 @@ void HttpHandler::transferArgumentsToConfig() {
 	config->updateValue(&config->temperatureMqttTopic, httpServer->arg("temperatureMqttTopic"), "temperatureMqttTopic");
 	config->updateValue(&config->humidityMqttTopic, httpServer->arg("humidityMqttTopic"), "humidityMqttTopic");
 	config->updateValue(&config->fanSpeedMqttTopic, httpServer->arg("fanSpeedMqttTopic"), "fanSpeedMqttTopic");
+	config->updateValue(&config->mirrorHeatingMqttTopic, httpServer->arg("mirrorHeatingMqttTopic"), "mirrorHeatingMqttTopic");
 
 	////////////////////////////////////////////////////////////////
 	config->updateValue(&config->mode, httpServer->arg("mode"), "mode");
