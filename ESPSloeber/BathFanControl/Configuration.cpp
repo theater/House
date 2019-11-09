@@ -27,8 +27,8 @@ void Configuration::print() {
 	Serial.println("###########################################");
 	Serial.printf("Current mode=%d \n", mode);
 	Serial.printf("Desired humidity=%d%% \n", desiredHumidity);
-	Serial.printf("Low speed humidity threshold=%d%% \n", lowSpeedThreshold);
 	Serial.printf("High speed humidity threshold=%d%% \n", highSpeedThreshold);
+	Serial.printf("Humidity threshold tolerance=%d \n", humidityTolerance);
 	Serial.printf("Sensors refresh interval=%dms \n", sensorsUpdateReocurrenceIntervalMillis);
 	Serial.printf("Temperature correction=%d \n", temperatureCorrection);
 	Serial.printf("Humidity Correction=%d \n", humidityCorrection);
@@ -86,12 +86,12 @@ void Configuration::loadEprom() {
 		mode = EEPROM.get(nextAddress += sizeof(mode), mode);
 		mqttPort = EEPROM.get(nextAddress += sizeof(mqttPort), mqttPort);
 		desiredHumidity = EEPROM.get(nextAddress += sizeof(desiredHumidity), desiredHumidity);
-		lowSpeedThreshold = EEPROM.get(nextAddress += sizeof(lowSpeedThreshold), lowSpeedThreshold);
 		highSpeedThreshold = EEPROM.get(nextAddress += sizeof(highSpeedThreshold), highSpeedThreshold);
 		sensorsUpdateReocurrenceIntervalMillis = EEPROM.get(nextAddress += sizeof(sensorsUpdateReocurrenceIntervalMillis),
 				sensorsUpdateReocurrenceIntervalMillis);
 		temperatureCorrection = EEPROM.get(nextAddress += sizeof(temperatureCorrection), temperatureCorrection);
 		humidityCorrection = EEPROM.get(nextAddress += sizeof(humidityCorrection), humidityCorrection);
+		humidityTolerance = EEPROM.get(nextAddress += sizeof(humidityTolerance), humidityTolerance);
 		Serial.printf("Finished loading primitives. Last address=%d\n", nextAddress);
 	} else {
 		Serial.printf("Configuration hash from EPROM not equal to expected. Default values will be used. Value expected=%d, Value in EPROM=%d\n", this->configurationHash, hash);
@@ -126,11 +126,11 @@ void Configuration::saveEprom() {
 	EEPROM.put(nextAddress += sizeof(mode), mode);
 	EEPROM.put(nextAddress += sizeof(mqttPort), mqttPort);
 	EEPROM.put(nextAddress += sizeof(desiredHumidity), desiredHumidity);
-	EEPROM.put(nextAddress += sizeof(lowSpeedThreshold), lowSpeedThreshold);
 	EEPROM.put(nextAddress += sizeof(highSpeedThreshold), highSpeedThreshold);
 	EEPROM.put(nextAddress += sizeof(sensorsUpdateReocurrenceIntervalMillis), sensorsUpdateReocurrenceIntervalMillis);
 	EEPROM.put(nextAddress += sizeof(temperatureCorrection), temperatureCorrection);
 	EEPROM.put(nextAddress += sizeof(humidityCorrection), humidityCorrection);
+	EEPROM.put(nextAddress += sizeof(humidityTolerance), humidityTolerance);
 	Serial.printf("Finished saving primitives. Last address=%d\n", nextAddress);
 	EEPROM.commit();
 	Serial.printf("EPROM used=%d bytes\n", nextAddress);

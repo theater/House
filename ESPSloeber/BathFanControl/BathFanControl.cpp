@@ -170,13 +170,14 @@ void controlHumidity(int humidityValue) {
 	}
 	//MODE = AUTO
 	if (configData.mode == 2) {
-		if ( humidityValue > configData.desiredHumidity) {
-			if (humidityValue > configData.highSpeedThreshold) {
+		if (humidityValue > configData.desiredHumidity) {
+			if (humidityValue > configData.highSpeedThreshold + configData.humidityTolerance) {
 				updatePinState(fanSpeedPin, HIGH_SPEED);
-			} else {
+				updatePinState(mirrorHeatingPin, ON);
+			} else if (humidityValue < configData.highSpeedThreshold - configData.humidityTolerance) {
 				updatePinState(fanSpeedPin, LOW_SPEED);
+				updatePinState(mirrorHeatingPin, OFF);
 			}
-			updatePinState(mirrorHeatingPin, ON);
 		} else {
 			updatePinState(fanSpeedPin, LOW_SPEED);
 			updatePinState(mirrorHeatingPin, OFF);
@@ -187,10 +188,14 @@ void controlHumidity(int humidityValue) {
 }
 
 void updatePinState(Pin *pin, const byte state) {
-	digitalWrite(pin->getPin(), state);
-	String stateStr = state ? "ON" : "OFF";
-	Serial.printf("Updated pin %d to state %s.\n", pin->getPin(), stateStr.c_str());
-	mqttClient->publish(pin->getTopic(), stateStr.c_str());
+	const char* stateStr = state ? "ON" : "OFF";
+	if (digitalRead(pin->getPin()) != state) {
+		digitalWrite(pin->getPin(), state);
+		Serial.printf("Updated pin %s to state %s.\n", pin->getTopic(), stateStr);
+		mqttClient->publish(pin->getTopic(), stateStr);
+	} else {
+		Serial.printf("No need to update pin %s. Already in state %s.\n", pin->getTopic(), stateStr);
+	}
 }
 
 void mqttCallback(const char* topic, const byte* payload, const unsigned int length) {

@@ -17,7 +17,7 @@ class Configuration {
 		static const unsigned STARTING_ADDRESS = 10;
 		static const unsigned MQTT_TOPICS_LENGTH = 60;
 	public:
-		int configurationHash = 460;
+		int configurationHash = 462;
 
 		bool isSimulated = true;
 
@@ -37,11 +37,11 @@ class Configuration {
 
 		int mode = 2;
 		int desiredHumidity = 60;
-		int lowSpeedThreshold = 70;
 		int highSpeedThreshold = 80;
 
 		int temperatureCorrection = 0;
 		int humidityCorrection = 0;
+		int humidityTolerance = 2;
 
 		unsigned sensorsUpdateReocurrenceIntervalMillis = 30000;
 
