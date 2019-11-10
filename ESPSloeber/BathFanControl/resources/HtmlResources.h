@@ -34,7 +34,7 @@ const char CONFIG_HTML[] PROGMEM = R"rawliteral(
     			<legend>Device Logic Settings:</legend>
     			Mode: <input type="text" name="mode" value="modeValue"><br>
     			Desired humidity: <input type="text" name="desiredHumidity" value="desiredHumidityValue"><br>
-    			High Speed Humidity Threshold: <input type="text" name="highSpeedThreshold" value="highSpeedThresholdValue"><br>
+    			High Speed Humidity Threshold Delta: <input type="text" name="highSpeedThreshold" value="highSpeedThresholdValue"><br>
     			Humidity Threshold Tolerance: <input type="text" name="humidityTolerance" value="humidityToleranceValue"><br>
     			Temperature Correction: <input type="text" name="temperatureCorrection" value="temperatureCorrectionValue"><br>
     			Humidity Correction: <input type="text" name="humidityCorrection" value="humidityCorrectionValue"><br>

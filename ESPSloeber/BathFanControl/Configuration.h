@@ -28,16 +28,16 @@ class Configuration {
 		int mqttPort = 1883;
 		String mqttClientName = "ESP_TMP";
 
-		String fanSpeedMqttTopic = "home/floor1/bathroom/fan/speed";
-		String mirrorHeatingMqttTopic = "home/floor1/bathroom/mirror/1";
-		String humidityMqttTopic = "home/floor1/bathroom/humidity/1";
-		String temperatureMqttTopic = "home/floor1/bathroom/temperature/1";
-		String modeMqttTopic = "home/floor1/bathroom/mode";
-		String desiredHumidityMqttTopic = "home/floor1/bathroom/humidity/desired";
+		String fanSpeedMqttTopic = "fan123";
+		String mirrorHeatingMqttTopic = "mirror123";
+		String humidityMqttTopic = "humidity123";
+		String temperatureMqttTopic = "temperature123";
+		String modeMqttTopic = "mode123";
+		String desiredHumidityMqttTopic = "desiredHumidity123";
 
 		int mode = 2;
 		int desiredHumidity = 60;
-		int highSpeedThreshold = 80;
+		int highSpeedThresholdDelta = 15;
 
 		int temperatureCorrection = 0;
 		int humidityCorrection = 0;

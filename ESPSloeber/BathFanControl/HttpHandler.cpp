@@ -95,7 +95,7 @@ String HttpHandler::replaceHtmlValues(String html, String status) {
 
 	html.replace("modeValue", String(config->mode));
 	html.replace("desiredHumidityValue", String(config->desiredHumidity));
-	html.replace("highSpeedThresholdValue", String(config->highSpeedThreshold));
+	html.replace("highSpeedThresholdValue", String(config->highSpeedThresholdDelta));
 	html.replace("humidityToleranceValue", String(config->humidityTolerance));
 	html.replace("temperatureCorrectionValue", String(config->temperatureCorrection));
 	html.replace("humidityCorrectionValue", String(config->humidityCorrection));
@@ -131,7 +131,7 @@ void HttpHandler::transferArgumentsToConfig() {
 	////////////////////////////////////////////////////////////////
 	config->updateValue(&config->mode, httpServer->arg("mode"), "mode");
 	config->updateValue(&config->desiredHumidity, httpServer->arg("desiredHumidity"), "desiredHumidity");
-	config->updateValue(&config->highSpeedThreshold, httpServer->arg("highSpeedThreshold"), "highSpeedThreshold");
+	config->updateValue(&config->highSpeedThresholdDelta, httpServer->arg("highSpeedThreshold"), "highSpeedThreshold");
 	config->updateValue(&config->temperatureCorrection, httpServer->arg("temperatureCorrection"), "temperatureCorrection");
 	config->updateValue(&config->humidityCorrection, httpServer->arg("humidityCorrection"), "humidityCorrection");
 	config->updateValue(&config->humidityTolerance, httpServer->arg("humidityTolerance"), "humidityTolerance");

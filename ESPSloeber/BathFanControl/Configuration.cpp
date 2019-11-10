@@ -27,7 +27,7 @@ void Configuration::print() {
 	Serial.println("###########################################");
 	Serial.printf("Current mode=%d \n", mode);
 	Serial.printf("Desired humidity=%d%% \n", desiredHumidity);
-	Serial.printf("High speed humidity threshold=%d%% \n", highSpeedThreshold);
+	Serial.printf("High speed humidity threshold=%d%% \n", highSpeedThresholdDelta);
 	Serial.printf("Humidity threshold tolerance=%d \n", humidityTolerance);
 	Serial.printf("Sensors refresh interval=%dms \n", sensorsUpdateReocurrenceIntervalMillis);
 	Serial.printf("Temperature correction=%d \n", temperatureCorrection);
@@ -86,7 +86,7 @@ void Configuration::loadEprom() {
 		mode = EEPROM.get(nextAddress += sizeof(mode), mode);
 		mqttPort = EEPROM.get(nextAddress += sizeof(mqttPort), mqttPort);
 		desiredHumidity = EEPROM.get(nextAddress += sizeof(desiredHumidity), desiredHumidity);
-		highSpeedThreshold = EEPROM.get(nextAddress += sizeof(highSpeedThreshold), highSpeedThreshold);
+		highSpeedThresholdDelta = EEPROM.get(nextAddress += sizeof(highSpeedThresholdDelta), highSpeedThresholdDelta);
 		sensorsUpdateReocurrenceIntervalMillis = EEPROM.get(nextAddress += sizeof(sensorsUpdateReocurrenceIntervalMillis),
 				sensorsUpdateReocurrenceIntervalMillis);
 		temperatureCorrection = EEPROM.get(nextAddress += sizeof(temperatureCorrection), temperatureCorrection);
@@ -126,7 +126,7 @@ void Configuration::saveEprom() {
 	EEPROM.put(nextAddress += sizeof(mode), mode);
 	EEPROM.put(nextAddress += sizeof(mqttPort), mqttPort);
 	EEPROM.put(nextAddress += sizeof(desiredHumidity), desiredHumidity);
-	EEPROM.put(nextAddress += sizeof(highSpeedThreshold), highSpeedThreshold);
+	EEPROM.put(nextAddress += sizeof(highSpeedThresholdDelta), highSpeedThresholdDelta);
 	EEPROM.put(nextAddress += sizeof(sensorsUpdateReocurrenceIntervalMillis), sensorsUpdateReocurrenceIntervalMillis);
 	EEPROM.put(nextAddress += sizeof(temperatureCorrection), temperatureCorrection);
 	EEPROM.put(nextAddress += sizeof(humidityCorrection), humidityCorrection);

@@ -171,13 +171,13 @@ void controlHumidity(int humidityValue) {
 	//MODE = AUTO
 	if (configData.mode == 2) {
 		if (humidityValue > configData.desiredHumidity) {
-			if (humidityValue > configData.highSpeedThreshold + configData.humidityTolerance) {
+			const int calculatedHighSpeedTreshold = configData.desiredHumidity + configData.highSpeedThresholdDelta;
+			if (humidityValue > calculatedHighSpeedTreshold + configData.humidityTolerance) {
 				updatePinState(fanSpeedPin, HIGH_SPEED);
-				updatePinState(mirrorHeatingPin, ON);
-			} else if (humidityValue < configData.highSpeedThreshold - configData.humidityTolerance) {
+			} else if (humidityValue < calculatedHighSpeedTreshold - configData.humidityTolerance) {
 				updatePinState(fanSpeedPin, LOW_SPEED);
-				updatePinState(mirrorHeatingPin, OFF);
 			}
+			updatePinState(mirrorHeatingPin, ON);
 		} else {
 			updatePinState(fanSpeedPin, LOW_SPEED);
 			updatePinState(mirrorHeatingPin, OFF);
