@@ -18,6 +18,12 @@
 #include "Util.h"
 #include "Configuration.h"
 
+namespace {
+
+	const int MQTT_RECONNECT_ATTEMPT_INTERVAL = 30000;
+
+}
+
 // Constants
 const int DHT_PIN = 2;
 const int FAN_SPEED_PIN = 12;
@@ -34,6 +40,7 @@ Configuration configData;
 float humiditySensorValue = 60;
 float temperatureSensorValue = 20;
 uint32_t interruptTime = 0;
+bool mqttDisconnectDetected = false;
 
 // Objects
 Pin *fanSpeedPin;
@@ -45,6 +52,7 @@ HttpHandler *httpHandler;
 
 // Timers
 Timer sensorsUpdateTrigger;
+Timer mqttReconnectTimer;
 
 void initializeGpioPinModes() {
 	fanSpeedPin = new Pin(FAN_SPEED_PIN, configData.fanSpeedMqttTopic.c_str());
@@ -68,24 +76,16 @@ void loopUntilConnected() {
 void mqttConnnect() {
 	mqttClient = new PubSubClient(configData.mqttServerAddress, 1883, mqttCallback, wifiClient);
 
-	const int maxRetries = 5;
-	int counter = 0;
 	const char *CLIENT_NAME = configData.mqttClientName.c_str();
-	while (!mqttClient->connected() && counter < maxRetries) {
-		Serial.println("Connecting to MQTT...");
-		if (mqttClient->connect(CLIENT_NAME, "user", "password")) {
-			Serial.println("MQTT connected sucessfully.");
-		} else {
-			Serial.printf("MQTT connect failed with state=%d\n", mqttClient->state());
-			delay(5000);
-		}
-		counter++;
-	}
-	if (counter != maxRetries) {
+	Serial.println("Connecting to MQTT...");
+	if (mqttClient->connect(CLIENT_NAME, "user", "password")) {
+		Serial.println("MQTT connected sucessfully.");
 		mqttClient->publish(configData.mqttClientName.c_str(), (String("Hello from ") + CLIENT_NAME).c_str());
 	} else {
-		Serial.println("Error connecting to MQTT server. Giving up.");
+		Serial.printf("MQTT connect failed with state=%d\n", mqttClient->state());
+		delay(5000);
 	}
+	mqttDisconnectDetected = false;
 }
 
 void subscribeToMqttTopics() {
@@ -216,8 +216,17 @@ void mqttCallback(const char* topic, const byte* payload, const unsigned int len
 	}
 }
 
+void mqttLoop() {
+	if (!mqttClient->loop() && !mqttDisconnectDetected) {
+		Serial.println("Disconnect detected. Will attempt reconnect in designated time frame");
+		mqttDisconnectDetected = true;
+		mqttReconnectTimer.after(MQTT_RECONNECT_ATTEMPT_INTERVAL, &mqttConnnect);
+	}
+	mqttReconnectTimer.update();
+}
+
 void loop() {
 	httpHandler->handleClient();
 	sensorsUpdateTrigger.update();
-	mqttClient->loop();
+	mqttLoop();
 }
