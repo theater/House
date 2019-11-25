@@ -17,7 +17,7 @@ class Configuration {
 		static const unsigned STARTING_ADDRESS = 10;
 		static const unsigned MQTT_TOPICS_LENGTH = 60;
 	public:
-		int configurationHash = 462;
+		int serialNumber = 462;
 
 		bool isSimulated = true;
 

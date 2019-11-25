@@ -11,7 +11,7 @@ void Configuration::print() {
 	Serial.println("###########################################");
 	String simulated = isSimulated ? "true" : "false";
 	Serial.printf("Simulated=%s \n", simulated.c_str());
-	Serial.printf("configurationHash=%d \n", configurationHash);
+	Serial.printf("Configuration serial number=%d \n", serialNumber);
 	Serial.println("###########################################");
 	Serial.printf("SSID=%s \n", ssid.c_str());
 	Serial.printf("SSID Password=%s \n", ssidPassword.c_str());
@@ -63,13 +63,13 @@ void Configuration::updateValue(bool * configProperty, String value, String para
 
 void Configuration::loadEprom() {
 	int nextAddress = STARTING_ADDRESS;
-	Serial.printf("Loading config from EPROM...\nStarting with address=%d. Hash before load=%d\n", nextAddress, configurationHash);
+	Serial.printf("Loading config from EPROM...\nStarting with address=%d. Serial number before load=%d\n", nextAddress, serialNumber);
 	EEPROM.begin(512);
-	int hash;
-	hash = EEPROM.get(nextAddress, hash);
-	Serial.printf("Loaded hash from EPROM=%d\n", hash);
-	if (hash == configurationHash) {
-		nextAddress+=sizeof(hash);
+	int memSerialNumber;
+	memSerialNumber = EEPROM.get(nextAddress, memSerialNumber);
+	Serial.printf("Loaded serial number from EPROM=%d\n", memSerialNumber);
+	if (memSerialNumber == serialNumber) {
+		nextAddress+=sizeof(memSerialNumber);
 		ssid = getStringEprom(&nextAddress);
 		ssidPassword = getStringEprom(&nextAddress);
 		mqttServerAddress.fromString(getStringEprom(&nextAddress));
@@ -94,7 +94,7 @@ void Configuration::loadEprom() {
 		humidityTolerance = EEPROM.get(nextAddress += sizeof(humidityTolerance), humidityTolerance);
 		Serial.printf("Finished loading primitives. Last address=%d\n", nextAddress);
 	} else {
-		Serial.printf("Configuration hash from EPROM not equal to expected. Default values will be used. Value expected=%d, Value in EPROM=%d\n", this->configurationHash, hash);
+		Serial.printf("Configuration serial number from EPROM not equal to expected. Default values will be used. Value expected=%d, Value in EPROM=%d\n", this->serialNumber, memSerialNumber);
 	}
 
 	print();
@@ -106,9 +106,9 @@ void Configuration::saveEprom() {
 	Serial.printf("Saving config from EPROM...\nStarting with address=%d.\n", nextAddress);
 	EEPROM.begin(512);
 
-	Serial.printf("Before writing configuration hash. Address=%d, hash=%d",nextAddress, configurationHash);
-	EEPROM.put(nextAddress, configurationHash);
-	nextAddress+=sizeof(configurationHash);
+	Serial.printf("Before writing configuration serial number. Address=%d, serial number=%d",nextAddress, serialNumber);
+	EEPROM.put(nextAddress, serialNumber);
+	nextAddress+=sizeof(serialNumber);
 
 	putStringEprom(&nextAddress, ssid);
 	putStringEprom(&nextAddress, ssidPassword);
